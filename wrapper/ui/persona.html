@@ -5,300 +5,643 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Citation Gate</title>
 <style>
-:root{--bg:#f6f4ef;--panel:#fff;--ink:#1c1b19;--mute:#6b675f;--line:#e2ddd3;--accent:#24345c;
---ok:#1f7a4d;--ok-bg:#e5f3ea;--hold:#9a6200;--hold-bg:#fbf0d9;--bad:#b3261e;--bad-bg:#fbe5e3;--unk:#5b4a9e;--unk-bg:#ece8f8}
-@media (prefers-color-scheme:dark){:root{--bg:#141413;--panel:#1d1d1b;--ink:#ece9e2;--mute:#a19c92;--line:#34322e;--accent:#9db0e0;
---ok:#6fcf9b;--ok-bg:#16301f;--hold:#f0bf5f;--hold-bg:#33280f;--bad:#f2867d;--bad-bg:#3a1714;--unk:#b9a8f0;--unk-bg:#26213d}}
+:root{
+  --serif:"Iowan Old Style","Charter","New York",ui-serif,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace;
+  --shell:#0e0f11;--shell-2:#16181b;--shell-line:#24272c;--shell-ink:#e8e6e1;--shell-mute:#8a8d93;
+  --bg:#f4f2ed;--paper:#fffefb;--ink:#17171a;--ink-2:#45464b;--mute:#8b8a85;--line:#e6e2d9;--line-2:#efebe3;
+  --brand:#c8a96a;--brand-ink:#7a5f2a;
+  --ok:#0f7b52;--ok-soft:#e3f2ea;--hold:#a76a00;--hold-soft:#fbf1dc;--bad:#c0362c;--bad-soft:#fbe6e3;--unk:#5a4bb0;--unk-soft:#ece9fb;
+  --shadow:0 1px 2px rgba(20,18,12,.04),0 8px 24px -12px rgba(20,18,12,.12);
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#121314;--paper:#1a1b1d;--ink:#ecebe7;--ink-2:#b9b8b3;--mute:#7f7e7a;--line:#2a2b2e;--line-2:#222326;
+  --brand-ink:#d9bd82;--ok:#4cc68f;--ok-soft:#14291f;--hold:#e9b452;--hold-soft:#2e2412;--bad:#f07b70;--bad-soft:#331816;--unk:#a99bf5;--unk-soft:#221e38;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -14px rgba(0,0,0,.6)}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
-header{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
-header h1{font:600 18px/1.2 Georgia,"Times New Roman",serif;margin:0}
-header .sub{color:var(--mute);font-size:13px}
-#health{margin-left:auto;font-size:13px;padding:4px 10px;border-radius:999px;border:1px solid var(--line)}
-nav{display:flex;gap:4px;padding:0 24px;background:var(--panel);border-bottom:1px solid var(--line)}
-nav button{border:0;background:none;padding:10px 14px;font:inherit;color:var(--mute);cursor:pointer;border-bottom:2px solid transparent}
-nav button[aria-selected=true]{color:var(--ink);border-color:var(--accent);font-weight:600}
-main{max-width:1240px;margin:0 auto;padding:20px 24px}
-.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px}
-@media (max-width:900px){.grid{grid-template-columns:1fr}main{padding:16px}}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
-h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 10px}
-textarea{width:100%;min-height:220px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:15px/1.6 Georgia,serif;resize:vertical}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
-.btn{border:1px solid var(--accent);background:var(--accent);color:var(--panel);padding:9px 16px;border-radius:7px;font:600 14px inherit;font-family:inherit;cursor:pointer}
-.btn.ghost{background:none;color:var(--accent)}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans);-webkit-font-smoothing:antialiased;display:flex;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+::selection{background:#c8a96a55}
+
+/* ---------- shell ---------- */
+aside{width:232px;flex:none;background:var(--shell);color:var(--shell-ink);display:flex;flex-direction:column;border-right:1px solid #000}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 16px}
+.logo{width:28px;height:28px;border-radius:7px;background:linear-gradient(145deg,#e3c78c,#9c7b3c);display:grid;place-items:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.logo svg{width:16px;height:16px}
+.brand b{font:600 15px/1 var(--sans);letter-spacing:-.01em}
+.brand small{display:block;color:var(--shell-mute);font-size:11px;margin-top:3px}
+.ws{margin:0 12px 14px;padding:9px 10px;border:1px solid var(--shell-line);border-radius:8px;background:var(--shell-2);font-size:12.5px;display:flex;align-items:center;gap:8px}
+.ws .av{width:20px;height:20px;border-radius:5px;background:#2b2f36;display:grid;place-items:center;font:600 10px var(--sans);color:#c9ccd2}
+.ws span{color:var(--shell-mute);margin-left:auto;font-size:11px}
+.navlabel{padding:10px 20px 6px;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#5d6066}
+.nav{display:flex;flex-direction:column;gap:1px;padding:0 10px}
+.nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;color:#b4b7bd;font-size:13.5px;transition:background .15s,color .15s}
+.nav button:hover{background:var(--shell-2);color:#fff}
+.nav button[aria-current=true]{background:#1f2226;color:#fff;box-shadow:inset 0 0 0 1px var(--shell-line)}
+.nav svg{width:16px;height:16px;opacity:.8}
+.nav kbd{margin-left:auto}
+kbd{font:500 10.5px var(--mono);color:var(--shell-mute);border:1px solid var(--shell-line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:transparent}
+.side-foot{margin-top:auto;padding:14px 16px;border-top:1px solid var(--shell-line);font-size:12px;color:var(--shell-mute)}
+.live{display:flex;align-items:center;gap:8px;color:#cfd2d7}
+.dot{width:7px;height:7px;border-radius:50%;background:#3ecf8e;box-shadow:0 0 0 0 #3ecf8e88;animation:pulse 2s infinite}
+.dot.off{background:#f05d52;animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 #3ecf8e66}70%{box-shadow:0 0 0 6px #3ecf8e00}100%{box-shadow:0 0 0 0 #3ecf8e00}}
+.side-foot .meta{margin-top:8px;font:11px/1.6 var(--mono);color:#62656b}
+
+.app{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 22px;border-bottom:1px solid var(--line);background:var(--paper)}
+.crumb{font-size:13px;color:var(--mute);display:flex;gap:8px;align-items:center;white-space:nowrap;overflow:hidden}
+.crumb b{color:var(--ink);font-weight:550}
+.top .search{margin-left:auto;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:6px 8px 6px 10px;color:var(--mute);font-size:12.5px;min-width:240px;transition:border-color .15s}
+.top .search:hover{border-color:var(--ink-2)}
+.top .search kbd{color:var(--mute);border-color:var(--line);margin-left:auto}
+.view{flex:1;overflow:auto;display:none}
+.view.on{display:block;animation:fade .25s var(--ease)}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ---------- review ---------- */
+.review{display:grid;grid-template-columns:minmax(0,1fr) 440px;height:100%}
+.desk{overflow:auto;padding:28px 32px 60px}
+.paper{max-width:720px;margin:0 auto;background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.paper-head{padding:22px 34px 16px;border-bottom:1px solid var(--line-2);display:grid;grid-template-columns:70px 1fr;row-gap:6px;font-size:12.5px}
+.paper-head dt{color:var(--mute);text-transform:uppercase;letter-spacing:.07em;font-size:10.5px;padding-top:2px}
+.paper-head dd{margin:0;color:var(--ink-2)}
+.paper-head .title{grid-column:1/-1;font:600 11px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--brand-ink);margin-bottom:6px}
+.doc{position:relative}
+#text,.annot{display:block;width:100%;min-height:300px;padding:26px 34px 34px;border:0;outline:0;background:transparent;color:var(--ink);font:17px/1.85 var(--serif);resize:none;white-space:pre-wrap;word-wrap:break-word}
+#text::placeholder{color:#b5b1a7}
+.annot{display:none}
+.doc.annotated #text{display:none}.doc.annotated .annot{display:block}
+.scan{position:absolute;left:0;right:0;height:80px;top:-80px;background:linear-gradient(180deg,transparent,#c8a96a22 60%,#c8a96a55);border-bottom:1px solid #c8a96a;pointer-events:none;opacity:0}
+.busy .scan{opacity:1;animation:scan 1.6s var(--ease) infinite}
+@keyframes scan{from{top:-80px}to{top:100%}}
+.paper-foot{display:flex;align-items:center;gap:10px;padding:12px 16px 12px 34px;border-top:1px solid var(--line-2);background:linear-gradient(var(--paper),var(--bg))}
+.paper-foot .count{font:11.5px var(--mono);color:var(--mute)}
+.paper-foot .count.over{color:var(--bad)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;border-radius:7px;padding:8px 14px;font-weight:550;font-size:13px;transition:transform .08s,background .15s,border-color .15s,opacity .15s}
+.btn:active{transform:scale(.98)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
-.count{margin-left:auto;font-size:12px;color:var(--mute)}
-.count.over{color:var(--bad);font-weight:600}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:5px 9px;font-size:12.5px;cursor:pointer;max-width:100%;text-align:left}
-.chip:hover{border-color:var(--accent)}
-.empty{color:var(--mute);text-align:center;padding:50px 10px}
-.verdict{display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:9px;margin-bottom:14px}
-.verdict .icon{font-size:26px;line-height:1;font-weight:700}
-.verdict .label{font-weight:700;letter-spacing:.04em;font-size:14px}
-.verdict .reason{margin-top:4px}
-.v-APPROVE{background:var(--ok-bg);color:var(--ok)} .v-HOLD_FOR_REVIEW{background:var(--hold-bg);color:var(--hold)} .v-BLOCK{background:var(--bad-bg);color:var(--bad)}
-.verdict .reason,.verdict .conseq{color:var(--ink)}
-.conseq{font-size:13px;margin-top:6px}
-.action{display:flex;gap:8px;align-items:center;padding:10px 12px;border:1px dashed var(--line);border-radius:8px;font-size:14px;margin-bottom:14px}
-.memo{font:15px/1.8 Georgia,serif;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);margin-bottom:14px;white-space:pre-wrap}
-mark{padding:1px 3px;border-radius:4px;color:inherit}
-mark sup{font:700 10px/1 -apple-system,sans-serif;margin-left:3px;letter-spacing:.03em}
-.s-verified{background:var(--ok-bg);border-bottom:2px solid var(--ok)} .s-verified sup{color:var(--ok)}
-.s-fabricated,.s-misstated{background:var(--bad-bg);border-bottom:2px solid var(--bad)} .s-fabricated sup,.s-misstated sup{color:var(--bad)}
-.s-unverified,.s-check{background:var(--unk-bg);border-bottom:2px dashed var(--unk)} .s-unverified sup,.s-check sup{color:var(--unk)}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--mute);font-weight:600;font-size:12px}
-.sig{display:grid;grid-template-columns:90px 1fr 44px;gap:8px;align-items:center;font-size:13px;margin:4px 0}
-.bar{height:7px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
-.bar i.low{background:var(--bad)}
-ul.ev{margin:0;padding-left:18px;font-size:13.5px} ul.ev li{margin:3px 0}
-details summary{cursor:pointer;color:var(--mute);font-size:13px;margin:10px 0 6px}
-.review{border:1px solid var(--hold);border-radius:9px;padding:14px;margin-bottom:14px}
-.review input{width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;margin:6px 0}
-.err{background:var(--bad-bg);color:var(--bad);padding:10px 12px;border-radius:8px;margin-bottom:12px}
-.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s 0.8s linear infinite;vertical-align:-2px}
-@keyframes s{to{transform:rotate(360deg)}}
-.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-@media (max-width:900px){.cols{grid-template-columns:1fr}}
-.col h3{margin:0 0 8px;font-size:14px}
-.mini{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;background:var(--panel);font-size:13px}
-.mini .t{font-family:Georgia,serif;font-size:13.5px;margin-bottom:6px}
-.mini .a{font-weight:600;font-size:12px}
-.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.03em}
-.hidden{display:none}
-.muted{color:var(--mute);font-size:13px}
+.btn.primary{background:var(--ink);color:var(--paper);margin-left:auto}
+.btn.primary:hover:not(:disabled){background:#000}
+@media (prefers-color-scheme:dark){.btn.primary{background:#ecebe7;color:#111}.btn.primary:hover:not(:disabled){background:#fff}}
+.btn.primary kbd{color:inherit;opacity:.6;border-color:currentColor}
+.btn.ghost{border-color:var(--line);background:var(--paper)}
+.btn.ghost:hover{border-color:var(--ink-2)}
+.btn.sm{padding:5px 10px;font-size:12px}
+
+.samples{max-width:720px;margin:18px auto 0}
+.samples h4{margin:0 0 8px;font:600 10.5px var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--mute);display:flex;justify-content:space-between}
+.samples h4 span{text-transform:none;letter-spacing:0;font-weight:400}
+.srow{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.scard{flex:none;width:230px;text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:10px 12px;font:13px/1.45 var(--serif);color:var(--ink-2);transition:border-color .15s,transform .15s}
+.scard:hover{border-color:var(--ink-2);transform:translateY(-1px)}
+.scard i{display:block;font:500 10.5px var(--mono);color:var(--mute);font-style:normal;margin-bottom:4px}
+
+mark{color:inherit;background:none;border-radius:3px;padding:1px 1px;cursor:pointer;position:relative;transition:background .15s}
+mark.s-verified{background:linear-gradient(transparent 62%,#0f7b5224 62%);box-shadow:inset 0 -1.5px 0 var(--ok)}
+mark.s-fabricated,mark.s-misstated{background:linear-gradient(transparent 0,#c0362c1c 0);box-shadow:inset 0 -2px 0 var(--bad)}
+mark.s-unverified,mark.s-check{background:linear-gradient(transparent 62%,#5a4bb022 62%);box-shadow:inset 0 -1.5px 0 var(--unk)}
+mark.flash{animation:flash 1s var(--ease)}
+@keyframes flash{0%,100%{outline:0 solid transparent}30%{outline:3px solid #c8a96a88}}
+mark .pin{display:inline-block;vertical-align:super;font:700 9px/1 var(--sans);margin-left:2px;padding:1px 3px;border-radius:3px;color:#fff}
+.s-verified .pin{background:var(--ok)}.s-fabricated .pin,.s-misstated .pin{background:var(--bad)}.s-unverified .pin,.s-check .pin{background:var(--unk)}
+mark.phrase{box-shadow:inset 0 -1.5px 0 var(--hold);background:linear-gradient(transparent 62%,#a76a0022 62%)}
+
+.pop{position:fixed;z-index:50;width:340px;background:var(--paper);border:1px solid var(--line);border-radius:10px;box-shadow:0 18px 50px -12px rgba(0,0,0,.35);padding:14px 16px;font-size:13px;opacity:0;transform:translateY(4px);pointer-events:none;transition:opacity .12s,transform .12s}
+.pop.on{opacity:1;transform:none}
+.pop .k{font:600 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase}
+.pop h5{margin:4px 0 6px;font:600 15px/1.3 var(--serif)}
+.pop p{margin:4px 0;color:var(--ink-2)}
+
+/* inspector */
+.insp{border-left:1px solid var(--line);background:var(--paper);overflow:auto;display:flex;flex-direction:column}
+.insp-h{padding:16px 20px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:8px}
+.insp-h b{font-size:13px}
+.insp-h span{margin-left:auto;font:11px var(--mono);color:var(--mute)}
+.sec{padding:16px 20px;border-bottom:1px solid var(--line-2)}
+.sec h6{margin:0 0 10px;font:600 10.5px var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--mute);display:flex;justify-content:space-between}
+.sec h6 span{font-family:var(--mono);letter-spacing:0;text-transform:none;font-weight:400}
+.idle{padding:40px 24px;text-align:center;color:var(--mute)}
+.idle svg{width:44px;height:44px;opacity:.35;margin-bottom:10px}
+.idle h3{margin:0 0 6px;color:var(--ink);font:500 19px var(--serif)}
+
+.pipe{list-style:none;margin:0;padding:0;position:relative}
+.pipe li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:6px 0;position:relative;font-size:13px;color:var(--mute);transition:color .2s}
+.pipe li:not(:last-child)::after{content:"";position:absolute;left:10px;top:26px;bottom:-6px;width:1.5px;background:var(--line)}
+.pipe .n{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font:600 10px var(--mono);background:var(--paper);transition:all .25s var(--ease);position:relative;z-index:1}
+.pipe li.run{color:var(--ink)}.pipe li.run .n{border-color:var(--brand);color:var(--brand-ink);box-shadow:0 0 0 4px #c8a96a26}
+.pipe li.run .n::before{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid transparent;border-top-color:var(--brand);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pipe li.ok .n{background:var(--ok);border-color:var(--ok);color:#fff}
+.pipe li.warn .n{background:var(--hold);border-color:var(--hold);color:#fff}
+.pipe li.fail .n{background:var(--bad);border-color:var(--bad);color:#fff}
+.pipe li.ok,.pipe li.warn,.pipe li.fail{color:var(--ink)}
+.pipe .d{font-size:11.5px;color:var(--mute);margin-top:1px}
+.pipe .r{font:11.5px var(--mono);color:var(--mute);padding-top:2px}
+
+.verdict{padding:20px;border-bottom:1px solid var(--line-2);position:relative;overflow:hidden;animation:rise .35s var(--ease)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.verdict::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+.verdict.APPROVE::before{background:var(--ok)}.verdict.HOLD_FOR_REVIEW::before{background:var(--hold)}.verdict.BLOCK::before{background:var(--bad)}
+.vk{display:inline-flex;align-items:center;gap:6px;font:600 10.5px var(--sans);letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:4px}
+.APPROVE .vk{background:var(--ok-soft);color:var(--ok)}.HOLD_FOR_REVIEW .vk{background:var(--hold-soft);color:var(--hold)}.BLOCK .vk{background:var(--bad-soft);color:var(--bad)}
+.vt{font:500 30px/1.15 var(--serif);letter-spacing:-.015em;margin:10px 0 6px}
+.vr{color:var(--ink-2);font-size:13.5px}
+.conseq{margin-top:12px;padding:10px 12px;border-radius:7px;background:var(--bg);font-size:12.5px;color:var(--ink-2)}
+.conseq b{color:var(--ink)}
+.receipt{margin-top:12px;font:11.5px/1.7 var(--mono);border:1px dashed var(--line);border-radius:7px;padding:9px 12px;color:var(--ink-2)}
+.receipt .x{color:var(--bad)}.receipt .y{color:var(--ok)}
+
+.cite{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:10px 0;border-top:1px solid var(--line-2);cursor:pointer}
+.cite:first-of-type{border-top:0;padding-top:0}
+.cite .tag{grid-row:1/3}
+.cite b{font:600 14px var(--serif)}
+.cite p{margin:0;color:var(--ink-2);font-size:12.5px}
+.tag{font:700 9.5px var(--sans);letter-spacing:.08em;padding:3px 6px;border-radius:4px;height:fit-content;white-space:nowrap}
+.t-verified{background:var(--ok-soft);color:var(--ok)}.t-fabricated,.t-misstated{background:var(--bad-soft);color:var(--bad)}.t-unverified,.t-check{background:var(--unk-soft);color:var(--unk)}
+.t-APPROVE{background:var(--ok-soft);color:var(--ok)}.t-HOLD_FOR_REVIEW{background:var(--hold-soft);color:var(--hold)}.t-BLOCK{background:var(--bad-soft);color:var(--bad)}
+
+.ezh{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.ezh .sc{font:500 28px/1 var(--serif)}
+.ezh small{color:var(--mute);font-size:12px}
+.meter{display:grid;grid-template-columns:76px 1fr 34px;align-items:center;gap:10px;font-size:12.5px;margin:7px 0;color:var(--ink-2)}
+.meter .tr{height:4px;border-radius:2px;background:var(--line-2);overflow:hidden}
+.meter .tr i{display:block;height:100%;background:var(--ink-2);border-radius:2px;width:0;transition:width .7s var(--ease)}
+.meter .tr i.low{background:var(--bad)}
+.meter .v{font:12px var(--mono);text-align:right}
+.note{font-size:12px;color:var(--mute);margin-top:10px;line-height:1.5}
+.claim{font-size:12.5px;padding:8px 10px;border-radius:6px;background:var(--bg);margin-top:8px}
+.degraded{background:var(--hold-soft);color:var(--hold);border-radius:7px;padding:10px 12px;font-size:12.5px}
+.degraded b{display:block;margin-bottom:2px}
+.ev{margin:0;padding:0;list-style:none;font-size:12.5px;color:var(--ink-2)}
+.ev li{padding:6px 0;border-top:1px solid var(--line-2);display:flex;gap:8px}
+.ev li::before{content:"→";color:var(--mute);font-family:var(--mono)}
+details summary{cursor:pointer;list-style:none;font:600 10.5px var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
+details summary::-webkit-details-marker{display:none}
+details[open] summary{margin-bottom:8px}
+
+.reviewbox{padding:16px 20px;border-bottom:1px solid var(--line-2);background:linear-gradient(var(--hold-soft),transparent)}
+.reviewbox h6{margin:0 0 4px;font-size:13px}
+.reviewbox p{margin:0 0 10px;color:var(--ink-2);font-size:12.5px}
+.field{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--paper);color:var(--ink);font:13px var(--sans);margin-bottom:8px;outline:0;transition:border-color .15s,box-shadow .15s}
+.field:focus{border-color:var(--brand);box-shadow:0 0 0 3px #c8a96a33}
+.row{display:flex;gap:8px;align-items:center}
+.btn.ok{background:var(--ok);color:#fff}.btn.no{border-color:var(--line);background:var(--paper)}
+
+.errbox{margin:20px;padding:14px 16px;border-radius:8px;background:var(--bad-soft);color:var(--bad);font-size:13px}
+.errbox b{display:block;margin-bottom:4px}
+
+/* ---------- batch ---------- */
+.pagehead{padding:28px 32px 0;max-width:1240px;margin:0 auto}
+.pagehead h1{font:500 28px/1.2 var(--serif);letter-spacing:-.015em;margin:0 0 6px}
+.pagehead p{margin:0;color:var(--ink-2);max-width:640px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:1240px;margin:22px auto 0;padding:0 32px}
+.kpi{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.kpi small{font:600 10.5px var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
+.kpi b{display:block;font:500 30px/1.1 var(--serif);margin-top:6px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--mute)}
+.lanes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:1240px;margin:16px auto 40px;padding:0 32px}
+.lane{background:var(--line-2);border-radius:12px;padding:10px;min-height:300px}
+.lane h3{margin:2px 4px 10px;font:600 12.5px var(--sans);display:flex;align-items:center;gap:8px}
+.lane h3 i{width:8px;height:8px;border-radius:50%}
+.lane h3 span{margin-left:auto;font:500 11.5px var(--mono);color:var(--mute)}
+.lane h3 em{font-style:normal;font-weight:400;color:var(--mute)}
+.bcard{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:11px 12px;margin-bottom:8px;animation:drop .4s var(--ease);font-size:12.5px}
+@keyframes drop{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
+.bcard .t{font:13.5px/1.55 var(--serif);color:var(--ink);margin-bottom:8px}
+.bcard .r{color:var(--ink-2)}
+.bcard .f{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--line-2);font:11px var(--mono);color:var(--mute)}
+.bcard .f .y{color:var(--ok)}.bcard .f .x{color:var(--bad)}
+
+/* ---------- audit ---------- */
+.atable{max-width:1240px;margin:22px auto 40px;padding:0 32px}
+.filters{display:flex;gap:6px;margin-bottom:12px}
+.fchip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 11px;font-size:12px;color:var(--ink-2)}
+.fchip[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tbl{background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tr-row{display:grid;grid-template-columns:150px 130px minmax(0,1.2fr) minmax(0,1fr);gap:14px;padding:11px 16px;border-top:1px solid var(--line-2);font-size:12.5px;align-items:start}
+.tr-row.h{border-top:0;background:var(--bg);font:600 10.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.tr-row .ts{font:11.5px var(--mono);color:var(--mute)}
+.tr-row .memo{font:13px/1.5 var(--serif);color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tr-row .why{color:var(--ink-2)}
+.empty{padding:40px;text-align:center;color:var(--mute)}
+
+/* ---------- palette ---------- */
+.scrim{position:fixed;inset:0;background:rgba(10,10,12,.45);backdrop-filter:blur(3px);z-index:60;display:none;align-items:flex-start;justify-content:center;padding-top:12vh}
+.scrim.on{display:flex;animation:fade .15s}
+.pal{width:min(620px,92vw);background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 30px 80px -20px rgba(0,0,0,.5);overflow:hidden}
+.pal input{width:100%;border:0;outline:0;padding:16px 18px;font:16px var(--sans);background:transparent;color:var(--ink);border-bottom:1px solid var(--line)}
+.pal ul{list-style:none;margin:0;padding:6px;max-height:50vh;overflow:auto}
+.pal li{padding:9px 12px;border-radius:7px;font:14px/1.45 var(--serif);color:var(--ink-2);cursor:pointer;display:flex;gap:10px}
+.pal li i{font:500 10.5px var(--mono);color:var(--mute);font-style:normal;padding-top:3px;flex:none;width:36px}
+.pal li[aria-selected=true]{background:var(--bg);color:var(--ink)}
+.pal .hint{padding:8px 14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--mute);display:flex;gap:14px}
+.pal .hint kbd{color:var(--mute);border-color:var(--line)}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);background:#111;color:#f3f1ec;padding:10px 16px;border-radius:9px;font-size:13px;opacity:0;transition:all .25s var(--ease);z-index:70;box-shadow:0 12px 30px -10px rgba(0,0,0,.5)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1100px){.review{grid-template-columns:1fr;height:auto}.insp{border-left:0;border-top:1px solid var(--line)}body{overflow:auto}}
+@media (max-width:760px){aside{display:none}.kpis,.lanes{grid-template-columns:1fr}.desk{padding:16px}.tr-row{grid-template-columns:1fr}.top .search{min-width:0}}
 </style>
 </head>
 <body>
-<header>
-  <div>
-    <h1>⚖ Citation Gate</h1>
-    <div class="sub">Memo review before it goes to the partner: every case checked against the firm's trusted &amp; fabricated lists, plus Ezio's fact-check.</div>
+<aside>
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 16 16" fill="none" stroke="#1a1408" stroke-width="1.8" stroke-linecap="round"><path d="M3 13V6l5-3 5 3v7"/><path d="M6 13V9h4v4"/></svg></div>
+    <div><b>Citation Gate</b><small>Authority verification</small></div>
   </div>
-  <span id="health" role="status">checking…</span>
-</header>
-<nav role="tablist">
-  <button role="tab" aria-selected="true" data-tab="review">Review a memo</button>
-  <button role="tab" aria-selected="false" data-tab="batch">Run test memos</button>
-  <button role="tab" aria-selected="false" data-tab="audit">Audit trail</button>
-</nav>
-<main>
-  <section id="tab-review" class="grid">
-    <div>
-      <div class="card">
-        <h2>Draft memo</h2>
-        <label for="text" class="muted">Paste the memo text you're about to submit to the partner.</label>
-        <textarea id="text" placeholder="e.g. Under Gideon v. Wainwright, 372 U.S. 335 (1963), states must provide counsel to indigent defendants facing felony charges."></textarea>
-        <div class="row">
-          <button class="btn" id="go">Check &amp; submit to partner</button>
-          <button class="btn ghost" id="clear">Clear</button>
-          <span class="count" id="count">0 / 20,000</span>
+  <div class="ws"><div class="av">HR</div>Hollis &amp; Reed LLP<span>Litigation</span></div>
+  <div class="navlabel">Workspace</div>
+  <nav class="nav">
+    <button data-view="review" aria-current="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h6l3 3v9H4z"/><path d="M6 8h5M6 11h3"/></svg>Memo review<kbd>1</kbd></button>
+    <button data-view="batch"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="3.5" height="10" rx="1"/><rect x="6.25" y="3" width="3.5" height="10" rx="1"/><rect x="10.5" y="3" width="3.5" height="10" rx="1"/></svg>Gate simulation<kbd>2</kbd></button>
+    <button data-view="audit"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v6l3.5 2"/><circle cx="8" cy="8" r="6"/></svg>Audit trail<kbd>3</kbd></button>
+  </nav>
+  <div class="navlabel" style="margin-top:14px">Authority sources</div>
+  <div style="padding:0 20px;font-size:12.5px;color:#9a9da3;line-height:2">
+    <div>◆ Firm trusted list <span style="float:right;font-family:var(--mono);color:#62656b">10</span></div>
+    <div>◆ Known fabricated <span style="float:right;font-family:var(--mono);color:#62656b">3</span></div>
+    <div>◆ Ezio fact-check <span style="float:right;font-family:var(--mono);color:#62656b">API</span></div>
+  </div>
+  <div class="side-foot">
+    <div class="live"><span class="dot" id="hdot"></span><span id="htext">Connecting…</span></div>
+    <div class="meta" id="hmeta">policy v1 · fail-closed</div>
+  </div>
+</aside>
+
+<div class="app">
+  <div class="top">
+    <div class="crumb" id="crumb">Matters <span>/</span> Mata v. Avianca: tolling motion <span>/</span> <b>Memo review</b></div>
+    <button class="search" id="openpal"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>Load a test memo…<kbd>⌘K</kbd></button>
+  </div>
+
+  <section class="view on" id="v-review">
+    <div class="review">
+      <div class="desk">
+        <div class="paper" id="paper">
+          <dl class="paper-head">
+            <div class="title">Privileged &amp; Confidential: Attorney Work Product</div>
+            <dt>To</dt><dd>M. Hollis, Partner</dd>
+            <dt>From</dt><dd>Research team</dd>
+            <dt>Re</dt><dd>Authority for motion: draft for partner review</dd>
+          </dl>
+          <div class="doc" id="doc">
+            <div class="scan"></div>
+            <textarea id="text" spellcheck="false" aria-label="Memo text" placeholder="Paste or write the memo. Every case citation will be verified before it reaches the partner."></textarea>
+            <div class="annot" id="annot" tabindex="0" title="Click to edit"></div>
+          </div>
+          <div class="paper-foot">
+            <span class="count" id="count">0 / 20,000</span>
+            <button class="btn ghost sm" id="edit" style="display:none">Edit draft</button>
+            <button class="btn primary" id="go">Verify &amp; submit <kbd>⌘↵</kbd></button>
+          </div>
+        </div>
+        <div class="samples">
+          <h4>Test memos <span>or press ⌘K</span></h4>
+          <div class="srow" id="srow"></div>
         </div>
       </div>
-      <div class="card" style="margin-top:16px">
-        <h2>Or load a test memo</h2>
-        <div class="chips" id="samples"><span class="muted">loading samples…</span></div>
-      </div>
-    </div>
-    <div class="card" id="result" aria-live="polite">
-      <div class="empty">Submit a memo to see the gate decision, the evidence, and whether it reached the partner.</div>
+      <div class="insp" id="insp" aria-live="polite"></div>
     </div>
   </section>
 
-  <section id="tab-batch" class="hidden">
-    <div class="card" style="margin-bottom:16px">
-      <div class="row" style="margin-top:0">
-        <div><h2 style="margin:0">Simulate the action on test memos</h2>
-        <div class="muted">Sends every sample through <code>POST /decide</code>. Only approved memos run <code>submit_memo_to_partner</code>.</div></div>
-        <button class="btn" id="runall" style="margin-left:auto">Run all test memos</button>
-      </div>
-      <div id="batchstat" class="muted" style="margin-top:8px"></div>
+  <section class="view" id="v-batch">
+    <div class="pagehead">
+      <h1>Gate simulation</h1>
+      <p>Every test memo goes through the live gate (<code>POST /decide</code>). Only approved memos trigger <code>submit_memo_to_partner</code>; held and blocked memos never reach the action.</p>
+      <div class="row" style="margin-top:16px"><button class="btn primary" id="runall" style="margin-left:0">Run all test memos</button><span class="note" id="bstat" style="margin:0"></span></div>
     </div>
-    <div class="cols">
-      <div class="col"><h3 style="color:var(--ok)">✓ Approved: sent to partner</h3><div id="c-APPROVE"></div></div>
-      <div class="col"><h3 style="color:var(--hold)">⏸ Held: waiting for a human</h3><div id="c-HOLD_FOR_REVIEW"></div></div>
-      <div class="col"><h3 style="color:var(--bad)">✕ Blocked: never reached the partner</h3><div id="c-BLOCK"></div></div>
+    <div class="kpis">
+      <div class="kpi"><small>Delivered to partner</small><b id="k-sent">–</b><span>action executed</span></div>
+      <div class="kpi"><small>Held for a human</small><b id="k-held">–</b><span>awaiting review</span></div>
+      <div class="kpi"><small>Blocked at gate</small><b id="k-block">–</b><span>action never ran</span></div>
+      <div class="kpi"><small>Median latency</small><b id="k-lat">–</b><span>per decision, incl. Ezio</span></div>
+    </div>
+    <div class="lanes">
+      <div class="lane"><h3><i style="background:var(--ok)"></i>Approved <em>· sent</em><span id="n-APPROVE">0</span></h3><div id="l-APPROVE"></div></div>
+      <div class="lane"><h3><i style="background:var(--hold)"></i>Hold for review <em>· not sent</em><span id="n-HOLD_FOR_REVIEW">0</span></h3><div id="l-HOLD_FOR_REVIEW"></div></div>
+      <div class="lane"><h3><i style="background:var(--bad)"></i>Blocked <em>· never reached action</em><span id="n-BLOCK">0</span></h3><div id="l-BLOCK"></div></div>
     </div>
   </section>
 
-  <section id="tab-audit" class="hidden">
-    <div class="card">
-      <div class="row" style="margin-top:0"><h2 style="margin:0">Audit trail</h2><button class="btn ghost" id="refresh" style="margin-left:auto">Refresh</button></div>
-      <div id="audit" class="muted">loading…</div>
+  <section class="view" id="v-audit">
+    <div class="pagehead">
+      <h1>Audit trail</h1>
+      <p>Every decision the gate made, with its reason, from <code>audit_log.jsonl</code>, plus every human release or rejection from <code>review_log.jsonl</code>.</p>
+    </div>
+    <div class="atable">
+      <div class="row" style="margin-bottom:12px">
+        <div class="filters" id="filters" style="margin:0">
+          <button class="fchip" aria-pressed="true" data-f="">All</button>
+          <button class="fchip" aria-pressed="false" data-f="APPROVE">Approved</button>
+          <button class="fchip" aria-pressed="false" data-f="HOLD_FOR_REVIEW">Held</button>
+          <button class="fchip" aria-pressed="false" data-f="BLOCK">Blocked</button>
+          <button class="fchip" aria-pressed="false" data-f="REVIEW">Human reviews</button>
+        </div>
+        <button class="btn ghost sm" id="refresh" style="margin-left:auto">Refresh</button>
+      </div>
+      <div class="tbl" id="atbl"><div class="empty">Loading…</div></div>
     </div>
   </section>
-</main>
+</div>
+
+<div class="pop" id="pop"></div>
+<div class="scrim" id="scrim"><div class="pal"><input id="palq" placeholder="Search test memos…" autocomplete="off"><ul id="pall"></ul>
+  <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> load &amp; verify</span><span><kbd>esc</kbd> close</span></div></div></div>
+<div class="toast" id="toast"></div>
 
 <script>
-const PERSONA = "paralegal";
-const MAX = 20000;
-const META = {
-  APPROVE: {icon: "✓", label: "APPROVED", conseq: "Memo goes to the partner as written."},
-  HOLD_FOR_REVIEW: {icon: "⏸", label: "HOLD FOR REVIEW", conseq: "Not sent. If approved as-is, the partner may rely on something nobody has verified."},
-  BLOCK: {icon: "✕", label: "BLOCKED", conseq: "Not sent. Submitting this risks citing a bad case to a court (see Mata v. Avianca, where counsel was sanctioned)."},
-};
-const STATUS = {verified: "VERIFIED", fabricated: "FABRICATED", misstated: "MISSTATED", unverified: "UNVERIFIED", check: "CHECK"};
+const PERSONA = "paralegal", MAX = 20000;
 const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const LABEL = {verified:"VERIFIED",fabricated:"FABRICATED",misstated:"MISSTATED",unverified:"UNVERIFIED",check:"CHECK"};
+const V = {
+  APPROVE:{k:"Approved",t:"Cleared for the partner",c:"<b>Delivered.</b> Every authority checked out, so the memo went to the partner as written."},
+  HOLD_FOR_REVIEW:{k:"Hold for review",t:"Needs a human before it goes out",c:"<b>Not sent.</b> Approving as-is means the partner may rely on authority nobody has verified."},
+  BLOCK:{k:"Blocked",t:"Stopped before the partner",c:"<b>Not sent.</b> Filing this risks citing bad authority to a court. In Mata v. Avianca, counsel was sanctioned for exactly this."},
+};
+let SAMPLES = [], CURRENT = null, LAST_TEXT = "";
 
+/* ---------- api ---------- */
 async function decide(text, context = {}) {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 65000);
+  const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 65000), t0 = performance.now();
   try {
-    const res = await fetch("/decide", {method: "POST", headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({text, context, persona: PERSONA}), signal: ctrl.signal});
+    const res = await fetch("/decide", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({text, context, persona:PERSONA}), signal:ctrl.signal});
     const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(body.error || `Wrapper returned HTTP ${res.status}`);
+    if (!res.ok) throw new Error(body.error || `Gate returned HTTP ${res.status}`);
+    body._ms = Math.round(performance.now() - t0);
     return body;
   } catch (e) {
-    throw new Error(e.name === "AbortError" ? "No answer after 65 s: the wrapper or Ezio is stuck. Nothing was sent." : e.message);
+    throw new Error(e.name === "AbortError" ? "No decision after 65 s. The gate or Ezio is unresponsive." : e.message);
   } finally { clearTimeout(t); }
 }
 
-function highlight(text, cites) {
+/* ---------- annotate ---------- */
+const PHRASES = /slam dunk|will absolutely|absolutely|obviously|undeniabl\w*|without (?:a|any) doubt|guaranteed (?:win|victory|result)|airtight|open and shut|\b[A-Z]{5,}\b|!{2,}/g;
+function annotate(text, cites) {
   let out = "", i = 0;
-  for (const c of [...cites].sort((a, b) => a.start - b.start)) {
-    if (c.start < i) continue;
-    out += esc(text.slice(i, c.start));
-    out += `<mark class="s-${c.status}" title="${esc(c.notes.join(" "))}">${esc(text.slice(c.start, c.end))}<sup>${STATUS[c.status] || c.status}</sup></mark>`;
+  const marks = [...cites].sort((a, b) => a.start - b.start);
+  const plain = (s) => esc(s).replace(PHRASES, (m) => `<mark class="phrase" data-phrase="${esc(m)}">${m}</mark>`);
+  marks.forEach((c, idx) => {
+    if (c.start < i) return;
+    out += plain(text.slice(i, c.start));
+    out += `<mark class="s-${c.status}" data-c="${cites.indexOf(c)}" id="m${cites.indexOf(c)}">${esc(text.slice(c.start, c.end))}<span class="pin">${idx + 1}</span></mark>`;
     i = c.end;
-  }
-  return out + esc(text.slice(i));
+  });
+  return out + plain(text.slice(i));
 }
 
-function signalsHtml(s) {
-  if (!s || s.ezio === "unavailable") {
-    return `<div class="err">⚠ Ezio unavailable (${esc(s && s.error)}). Degraded mode: citations were still checked against the firm's lists; anything not clearly fabricated is held for a human.</div>`;
-  }
-  const bar = (k, v) => `<div class="sig"><span>${k}</span><div class="bar"><i class="${v < 60 ? "low" : ""}" style="width:${v}%"></i></div><span>${v}${v < 60 ? " ⚠" : ""}</span></div>`;
-  const claims = (s.claims || []).map((c) => `<li><b>${esc(c.verdict)}</b>: “${esc(c.text)}”${c.source ? ` <span class="muted">(${esc(c.source)})</span>` : ""}</li>`).join("");
-  return `<div class="muted" style="margin-bottom:6px">Overall <b>${esc(s.tier)} ${esc(s.score)}</b> · accuracy <b>${esc(s.accuracy)}</b>${s.accuracy === "not_scored" ? " (no public claims to fact-check; GREEN here doesn't prove the citations are real)" : ""}</div>
-    ${bar("Tone", s.tone)}${bar("Bias", s.bias)}${bar("Agreement", s.agreement)}
-    ${claims ? `<div style="margin-top:8px"><b style="font-size:13px">Ezio fact-checked claims</b><ul class="ev">${claims}</ul></div>` : ""}`;
+/* ---------- inspector ---------- */
+const STAGES = [
+  ["Extract authorities","Case names, short cites, reporters"],
+  ["Firm authority check","Trusted & fabricated lists"],
+  ["Holding fingerprint","Memo vs. firm's recorded holding"],
+  ["Ezio fact-check","Claims, tone, bias, agreement"],
+  ["Policy","Most severe finding wins"],
+  ["Action gate","submit_memo_to_partner"],
+];
+function pipeHtml(states = [], rights = []) {
+  return `<ol class="pipe">${STAGES.map(([a, b], i) => `<li class="${states[i] || ""}"><span class="n">${states[i] === "ok" ? "✓" : states[i] === "fail" ? "✕" : states[i] === "warn" ? "!" : i + 1}</span><div>${a}<div class="d">${b}</div></div><span class="r">${rights[i] || ""}</span></li>`).join("")}</ol>`;
 }
-
-function renderResult(r, text) {
-  const m = META[r.decision];
-  const cites = r.citations || [];
-  const rows = cites.map((c) => `<tr><td>${esc(c.as_written)}</td><td><span class="tag s-${c.status}">${STATUS[c.status] || c.status}</span></td><td>${esc(c.notes.join(" "))}</td></tr>`).join("");
-  $("result").innerHTML = `
-    <div class="verdict v-${r.decision}"><div class="icon" aria-hidden="true">${m.icon}</div>
-      <div><div class="label">${m.label}</div><div class="reason">${esc(r.reason)}</div><div class="conseq">${m.conseq}</div></div></div>
-    <div class="action">${r.action_executed
-      ? "📤 <b>submit_memo_to_partner</b> ran: the memo was delivered and logged in actions.log."
-      : "🛑 <b>submit_memo_to_partner</b> did <b>not</b> run: stopped at the gate before the action."}</div>
-    ${r.decision === "HOLD_FOR_REVIEW" ? `<div class="review" id="rev"><b>Reviewer decision</b>
-      <div class="muted">Your choice and reason go into the review log. Release sends the memo; reject sends it back to the drafter.</div>
-      <input id="revname" placeholder="Your name" value="Senior associate">
-      <input id="revreason" placeholder="Reason (required), e.g. Confirmed Harlan v. Pinecrest on Westlaw">
-      <div class="row"><button class="btn" id="release">Release to partner</button><button class="btn ghost" id="reject">Reject: back to drafter</button></div>
-      <div id="revout" class="muted"></div></div>` : ""}
-    <h2>Memo, citations highlighted</h2>
-    <div class="memo">${highlight(text, cites)}</div>
-    ${cites.length ? `<h2>Citation check (firm's trusted &amp; fabricated lists)</h2><table><tr><th>As written</th><th>Status</th><th>Evidence</th></tr>${rows}</table>` : `<p class="muted">No case citations found, so there is nothing to verify against the lists (rule 5: fine to submit).</p>`}
-    <h2 style="margin-top:16px">Ezio signals</h2>${signalsHtml(r.signals)}
-    <details><summary>All evidence (${(r.evidence || []).length})</summary><ul class="ev">${(r.evidence || []).map((e) => `<li>${esc(e)}</li>`).join("")}</ul></details>`;
+function idle() {
+  $("insp").innerHTML = `<div class="insp-h"><b>Inspector</b><span>idle</span></div>
+    <div class="idle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M12 3 4 7v5c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V7z"/><path d="m9 12 2 2 4-4"/></svg>
+    <h3>Nothing reaches the partner unverified</h3><div>Write a memo or load a test memo (⌘K). Every authority is checked against the firm's lists and Ezio before <span style="font-family:var(--mono);font-size:12px">submit_memo_to_partner</span> can run.</div></div>
+    <div class="sec"><h6>Inspection pipeline</h6>${pipeHtml()}</div>`;
+}
+let ticker;
+function running() {
+  let step = 0;
+  const draw = () => {
+    const st = STAGES.map((_, i) => i < step ? "ok" : i === step ? "run" : "");
+    $("insp").innerHTML = `<div class="insp-h"><b>Inspector</b><span id="elapsed">0.0s</span></div>
+      <div class="sec"><h6>Inspection pipeline <span>running</span></h6>${pipeHtml(st)}</div>
+      <div class="sec note" id="slowmsg">Checking authorities and waiting for Ezio. Nothing is sent until a decision exists.</div>`;
+  };
+  draw();
+  const t0 = performance.now();
+  ticker = setInterval(() => {
+    const s = (performance.now() - t0) / 1000;
+    if (step < 3 && s > (step + 1) * 0.35) { step++; draw(); }
+    const el = $("elapsed"); if (el) el.textContent = s.toFixed(1) + "s";
+    if (s > 8 && $("slowmsg")) $("slowmsg").textContent = "Ezio is responding slowly. The gate retries with backoff for up to 45 s, and the memo stays held meanwhile.";
+  }, 100);
+}
+function render(r, text) {
+  clearInterval(ticker);
+  CURRENT = r;
+  const cites = r.citations || [], s = r.signals || {}, down = s.ezio === "unavailable";
+  const bad = cites.filter((c) => c.status === "fabricated" || c.status === "misstated");
+  const unk = cites.filter((c) => c.status === "unverified" || c.status === "check");
+  const fab = cites.filter((c) => c.status === "fabricated");
+  const mis = cites.filter((c) => c.status === "misstated");
+  const contra = (s.claims || []).filter((c) => String(c.verdict).toLowerCase() === "contradicted");
+  const lowDim = !down && ["tone","bias","agreement"].some((k) => s[k] < 60);
+  const states = [
+    "ok",
+    fab.length ? "fail" : unk.length ? "warn" : "ok",
+    mis.length ? "fail" : "ok",
+    down ? "warn" : contra.length ? "fail" : (lowDim || s.accuracy === "unavailable") ? "warn" : "ok",
+    r.decision === "APPROVE" ? "ok" : r.decision === "BLOCK" ? "fail" : "warn",
+    r.action_executed ? "ok" : "fail",
+  ];
+  const rights = [
+    `${cites.length} found`,
+    cites.length ? `${cites.length - fab.length - unk.length}/${cites.length} known` : "n/a",
+    cites.length ? (mis.length ? `${mis.length} mismatch` : "match") : "n/a",
+    down ? "offline" : `${s.tier} ${s.score}`,
+    r.decision === "HOLD_FOR_REVIEW" ? "HOLD" : r.decision,
+    r.action_executed ? "executed" : "withheld",
+  ];
+  const now = new Date().toLocaleTimeString([], {hour12:false});
+  const meters = down ? `<div class="degraded"><b>Ezio unreachable. Degraded mode.</b>${esc(s.error || "")}. Authorities were still verified against the firm's lists; anything not provably bad is held for a human. The gate never approves blind.</div>`
+    : `<div class="ezh"><span class="sc">${esc(s.score)}</span><span class="vk t-${s.tier === "GREEN" ? "APPROVE" : s.tier === "RED" ? "BLOCK" : "HOLD_FOR_REVIEW"}" style="font:700 10px var(--sans);letter-spacing:.08em;padding:3px 7px;border-radius:4px">${esc(s.tier)}</span><small>accuracy ${esc(String(s.accuracy).replace("_"," "))}</small></div>
+      ${["tone","bias","agreement"].map((k) => `<div class="meter"><span>${k[0].toUpperCase() + k.slice(1)}</span><div class="tr"><i data-w="${s[k]}" class="${s[k] < 60 ? "low" : ""}"></i></div><span class="v">${s[k]}</span></div>`).join("")}
+      ${(s.claims || []).map((c) => `<div class="claim"><span class="tag ${String(c.verdict).toLowerCase() === "contradicted" ? "t-misstated" : "t-verified"}">${esc(String(c.verdict).toUpperCase())}</span> ${esc(c.text)}${c.source ? `<div class="note" style="margin-top:4px">${esc(c.source)}</div>` : ""}</div>`).join("")}
+      ${s.accuracy === "not_scored" && cites.length ? `<div class="note">Ezio found no public claims to check, so its ${esc(s.tier)} score says nothing about whether these cases exist. That's why the firm-list check runs independently.</div>` : ""}`;
+  $("insp").innerHTML = `
+    <div class="insp-h"><b>Inspector</b><span>${r._ms ? (r._ms / 1000).toFixed(2) + "s" : ""}</span></div>
+    <div class="verdict ${r.decision}">
+      <span class="vk">${r.decision === "APPROVE" ? "✓" : r.decision === "BLOCK" ? "✕" : "‖"} ${V[r.decision].k}</span>
+      <div class="vt">${V[r.decision].t}</div>
+      <div class="vr">${esc(r.reason.replace(/^(BLOCKED|HOLD FOR REVIEW): /, ""))}</div>
+      <div class="conseq">${V[r.decision].c}</div>
+      <div class="receipt">${now} &nbsp;submit_memo_to_partner() → ${r.action_executed ? `<span class="y">EXECUTED</span> · logged to actions.log` : `<span class="x">NOT EXECUTED</span> · stopped at gate`}</div>
+    </div>
+    ${r.decision === "HOLD_FOR_REVIEW" ? `<div class="reviewbox" id="rbox"><h6>Your call, reviewer</h6><p>Release sends the memo to the partner; reject returns it to the drafter. Both are logged with your reason.</p>
+      <input class="field" id="rname" value="Senior associate" aria-label="Reviewer name">
+      <input class="field" id="rreason" placeholder="Reason (required), e.g. Confirmed on Westlaw, 3d Cir. 2002" aria-label="Reason">
+      <div class="row"><button class="btn ok sm" id="rel">Release to partner</button><button class="btn no sm" id="rej">Return to drafter</button></div></div>` : ""}
+    <div class="sec"><h6>Authorities <span>${cites.length}</span></h6>
+      ${cites.length ? cites.map((c, i) => `<div class="cite" data-c="${i}"><span class="tag t-${c.status}">${i + 1} · ${LABEL[c.status] || c.status}</span><b>${esc(c.case)}</b><p>${esc(c.notes.join(" "))}</p></div>`).join("")
+        : `<div class="note" style="margin:0">No case citations in this memo, so there's nothing to verify against the firm's lists. A memo without authority is fine to submit (policy rule 5).</div>`}
+    </div>
+    <div class="sec"><h6>Ezio signals</h6>${meters}</div>
+    <div class="sec"><h6>Inspection pipeline <span>complete</span></h6>${pipeHtml(states, rights)}</div>
+    <div class="sec"><details><summary>Evidence log · ${(r.evidence || []).length}</summary><ul class="ev">${(r.evidence || []).map((e) => `<li>${esc(e)}</li>`).join("")}</ul></details></div>`;
+  requestAnimationFrame(() => document.querySelectorAll(".meter i").forEach((i) => i.style.width = i.dataset.w + "%"));
+  $("annot").innerHTML = annotate(text, cites);
+  $("doc").classList.add("annotated");
+  $("edit").style.display = "";
+  document.querySelectorAll(".cite").forEach((el) => el.onclick = () => {
+    const m = $("m" + el.dataset.c); if (!m) return;
+    m.scrollIntoView({behavior:"smooth", block:"center"}); m.classList.remove("flash"); void m.offsetWidth; m.classList.add("flash");
+  });
   if (r.decision === "HOLD_FOR_REVIEW") {
     const send = async (verdict) => {
-      const reason = $("revreason").value.trim();
-      if (!reason) { $("revout").innerHTML = `<span style="color:var(--bad)">A reason is required for the audit log.</span>`; return; }
-      $("release").disabled = $("reject").disabled = true;
+      const reason = $("rreason").value.trim();
+      if (!reason) { $("rreason").focus(); $("rreason").style.borderColor = "var(--bad)"; toast("A reason is required for the audit log"); return; }
+      $("rel").disabled = $("rej").disabled = true;
       try {
-        const res = await fetch("/review", {method: "POST", headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({text, verdict, reason, reviewer: $("revname").value, original_decision: r.decision})});
-        const b = await res.json();
-        if (!res.ok) throw new Error(b.error);
-        $("revout").innerHTML = verdict === "release" ? `✓ Released by ${esc(b.reviewer)}. The memo was sent and the reason logged.` : `✕ Rejected by ${esc(b.reviewer)}. Not sent; the reason was logged.`;
-      } catch (e) { $("revout").textContent = "Review failed: " + e.message; $("release").disabled = $("reject").disabled = false; }
+        const res = await fetch("/review", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({text, verdict, reason, reviewer:$("rname").value, original_decision:r.decision})});
+        const b = await res.json(); if (!res.ok) throw new Error(b.error);
+        $("rbox").innerHTML = `<h6>${verdict === "release" ? "✓ Released to partner" : "↩ Returned to drafter"}</h6><p>${esc(b.reviewer)}: “${esc(b.reason)}”</p><div class="receipt" style="margin:0">${b.timestamp.slice(11,19)} &nbsp;submit_memo_to_partner() → ${b.action_executed ? `<span class="y">EXECUTED</span> · released by reviewer` : `<span class="x">NOT EXECUTED</span>`}<br>review_log.jsonl ← entry written</div>`;
+        toast(verdict === "release" ? "Released. Memo delivered and logged" : "Returned to drafter. Logged");
+      } catch (e) { toast("Review failed: " + e.message); $("rel").disabled = $("rej").disabled = false; }
     };
-    $("release").onclick = () => send("release");
-    $("reject").onclick = () => send("reject");
+    $("rel").onclick = () => send("release"); $("rej").onclick = () => send("reject");
   }
 }
-
-async function run() {
-  const text = $("text").value;
-  if (!text.trim()) { $("result").innerHTML = `<div class="err">Paste a memo first. An empty memo can't be checked.</div>`; return; }
-  if (text.length > MAX) { $("result").innerHTML = `<div class="err">Memo is ${text.length.toLocaleString()} characters; the gate accepts at most 20,000. Split it into sections.</div>`; return; }
-  $("go").disabled = true;
-  $("result").innerHTML = `<div class="empty"><span class="spin"></span> Checking citations and asking Ezio…<div class="muted" id="slow"></div></div>`;
-  const slow = setTimeout(() => { const s = $("slow"); if (s) s.textContent = "Ezio is slow; the gate retries for up to 45 s. Nothing is sent until there's a decision."; }, 7000);
-  try { renderResult(await decide(text), text); }
-  catch (e) { $("result").innerHTML = `<div class="err"><b>No decision. Memo NOT sent.</b><br>${esc(e.message)}</div>`; }
-  finally { clearTimeout(slow); $("go").disabled = false; }
+function fail(msg) {
+  clearInterval(ticker);
+  $("insp").innerHTML = `<div class="insp-h"><b>Inspector</b><span>error</span></div><div class="errbox"><b>No decision. Memo not sent.</b>${esc(msg)}</div><div class="sec"><h6>Inspection pipeline</h6>${pipeHtml(["ok","","","fail","","fail"],["","","","error","","withheld"])}</div>`;
 }
 
-let SAMPLES = [];
+async function verify() {
+  const text = $("text").value;
+  if (!text.trim()) { $("text").focus(); toast("Write or load a memo first"); return; }
+  if (text.length > MAX) { toast(`Memo is ${text.length.toLocaleString()} characters; the limit is 20,000`); return; }
+  LAST_TEXT = text;
+  $("go").disabled = true; $("paper").classList.add("busy");
+  $("doc").classList.remove("annotated");
+  running();
+  try { render(await decide(text), text); }
+  catch (e) { fail(e.message); }
+  finally { $("go").disabled = false; $("paper").classList.remove("busy"); }
+}
+function editMode() { $("doc").classList.remove("annotated"); $("edit").style.display = "none"; $("text").focus(); }
+
+/* ---------- popover ---------- */
+const pop = $("pop");
+document.addEventListener("mouseover", (e) => {
+  const m = e.target.closest("mark"); if (!m || !CURRENT) { pop.classList.remove("on"); return; }
+  if (m.dataset.phrase) {
+    pop.innerHTML = `<div class="k" style="color:var(--hold)">Advocacy language</div><h5>“${esc(m.dataset.phrase)}”</h5><p>Memos to a partner must stay neutral (policy rule 4). This alone holds the memo for review.</p>`;
+  } else {
+    const c = (CURRENT.citations || [])[m.dataset.c]; if (!c) return;
+    const col = {verified:"var(--ok)",fabricated:"var(--bad)",misstated:"var(--bad)"}[c.status] || "var(--unk)";
+    pop.innerHTML = `<div class="k" style="color:${col}">${LABEL[c.status] || c.status}</div><h5>${esc(c.case)}</h5>${c.notes.map((n) => `<p>${esc(n)}</p>`).join("")}`;
+  }
+  const r = m.getBoundingClientRect();
+  pop.style.left = Math.min(window.innerWidth - 356, Math.max(12, r.left)) + "px";
+  pop.style.top = (r.bottom + 8 + 180 > window.innerHeight ? r.top - pop.offsetHeight - 8 : r.bottom + 8) + "px";
+  pop.classList.add("on");
+});
+
+/* ---------- samples + palette ---------- */
+function useSample(s) { setView("review"); $("text").value = s.text; count(); verify(); }
 async function loadSamples() {
   try {
-    const res = await fetch(`/api/samples?persona=${PERSONA}`);
-    SAMPLES = (await res.json()).samples || [];
-    $("samples").innerHTML = SAMPLES.map((s, i) => `<button class="chip" data-i="${i}">${esc(s.text.slice(0, 70))}${s.text.length > 70 ? "…" : ""}</button>`).join("");
-    $("samples").querySelectorAll(".chip").forEach((b) => b.onclick = () => { $("text").value = SAMPLES[b.dataset.i].text; updateCount(); run(); });
-  } catch { $("samples").innerHTML = `<span class="muted">Couldn't load samples.</span>`; }
+    SAMPLES = (await (await fetch(`/api/samples?persona=${PERSONA}`)).json()).samples || [];
+    $("srow").innerHTML = SAMPLES.map((s, i) => `<button class="scard" data-i="${i}"><i>${esc(s.id)}</i>${esc(s.text.length > 110 ? s.text.slice(0, 108) + "…" : s.text)}</button>`).join("");
+    $("srow").querySelectorAll(".scard").forEach((b) => b.onclick = () => useSample(SAMPLES[b.dataset.i]));
+  } catch { $("srow").innerHTML = `<span class="note">Couldn't load test memos.</span>`; }
 }
+let palSel = 0, palItems = [];
+function palRender() {
+  const q = $("palq").value.toLowerCase();
+  palItems = SAMPLES.filter((s) => !q || s.text.toLowerCase().includes(q) || s.id.includes(q));
+  palSel = Math.min(palSel, Math.max(0, palItems.length - 1));
+  $("pall").innerHTML = palItems.map((s, i) => `<li role="option" aria-selected="${i === palSel}" data-i="${i}"><i>${esc(s.id)}</i><span>${esc(s.text)}</span></li>`).join("") || `<li>No matches</li>`;
+  $("pall").querySelectorAll("li[data-i]").forEach((li) => { li.onclick = () => { closePal(); useSample(palItems[li.dataset.i]); }; li.onmousemove = () => { if (palSel != li.dataset.i) { palSel = +li.dataset.i; palRender(); } }; });
+  const sel = $("pall").querySelector("[aria-selected=true]"); if (sel) sel.scrollIntoView({block:"nearest"});
+}
+function openPal() { $("scrim").classList.add("on"); $("palq").value = ""; palSel = 0; palRender(); $("palq").focus(); }
+function closePal() { $("scrim").classList.remove("on"); }
+$("palq").oninput = () => { palSel = 0; palRender(); };
+$("palq").onkeydown = (e) => {
+  if (e.key === "ArrowDown") { palSel = Math.min(palSel + 1, palItems.length - 1); palRender(); e.preventDefault(); }
+  if (e.key === "ArrowUp") { palSel = Math.max(palSel - 1, 0); palRender(); e.preventDefault(); }
+  if (e.key === "Enter" && palItems[palSel]) { closePal(); useSample(palItems[palSel]); }
+  if (e.key === "Escape") closePal();
+};
+$("scrim").onclick = (e) => { if (e.target === $("scrim")) closePal(); };
 
+/* ---------- batch ---------- */
 async function runAll() {
+  setView("batch");
   $("runall").disabled = true;
-  for (const k of Object.keys(META)) $("c-" + k).innerHTML = "";
-  let done = 0, sent = 0;
-  const queue = SAMPLES.map((s) => s);
-  const worker = async () => {
-    while (queue.length) {
-      const s = queue.shift();
-      try {
-        const r = await decide(s.text, s.context);
-        if (r.action_executed) sent++;
-        $("c-" + r.decision).insertAdjacentHTML("beforeend", `<div class="mini"><div class="t">${highlight(s.text, r.citations || [])}</div>
-          <div>${esc(r.reason)}</div><div class="a" style="margin-top:4px">${r.action_executed ? "📤 sent to partner" : "🛑 action not run"}</div></div>`);
-      } catch (e) {
-        $("c-BLOCK").insertAdjacentHTML("beforeend", `<div class="mini err">${esc(s.text.slice(0, 80))}: ${esc(e.message)}</div>`);
-      }
-      $("batchstat").textContent = `${++done}/${SAMPLES.length} decided · ${sent} memo(s) sent · ${done - sent} stopped at the gate`;
+  ["APPROVE","HOLD_FOR_REVIEW","BLOCK"].forEach((k) => { $("l-" + k).innerHTML = ""; $("n-" + k).textContent = "0"; });
+  const n = {APPROVE:0, HOLD_FOR_REVIEW:0, BLOCK:0}, lat = []; let done = 0;
+  const kp = () => { $("k-sent").textContent = n.APPROVE; $("k-held").textContent = n.HOLD_FOR_REVIEW; $("k-block").textContent = n.BLOCK;
+    const sorted = [...lat].sort((a, b) => a - b); $("k-lat").textContent = sorted.length ? (sorted[sorted.length >> 1] / 1000).toFixed(1) + "s" : "–"; };
+  kp();
+  const queue = [...SAMPLES];
+  const worker = async () => { while (queue.length) {
+    const s = queue.shift();
+    try {
+      const r = await decide(s.text, s.context);
+      n[r.decision]++; lat.push(r._ms);
+      $("n-" + r.decision).textContent = n[r.decision];
+      $("l-" + r.decision).insertAdjacentHTML("afterbegin", `<div class="bcard"><div class="t">${annotate(s.text, r.citations || [])}</div><div class="r">${esc(r.reason.replace(/^(BLOCKED|HOLD FOR REVIEW): /, ""))}</div>
+        <div class="f"><span>${esc(s.id)} · ${(r._ms / 1000).toFixed(1)}s</span>${r.action_executed ? `<span class="y">submit_memo_to_partner ✓</span>` : `<span class="x">action withheld</span>`}</div></div>`);
+    } catch (e) {
+      $("l-BLOCK").insertAdjacentHTML("afterbegin", `<div class="bcard"><div class="r" style="color:var(--bad)">${esc(s.id)}: ${esc(e.message)}</div></div>`);
     }
-  };
-  $("batchstat").innerHTML = `<span class="spin"></span> running…`;
+    done++; kp(); $("bstat").textContent = `${done} of ${SAMPLES.length} decided`;
+  } };
+  $("bstat").textContent = "Running…";
   await Promise.all([worker(), worker(), worker(), worker()]);
+  $("bstat").textContent = `${SAMPLES.length} memos · ${n.APPROVE} delivered · ${n.HOLD_FOR_REVIEW + n.BLOCK} stopped at the gate`;
   $("runall").disabled = false;
 }
 
+/* ---------- audit ---------- */
+let AUD = null, FILTER = "";
 async function loadAudit() {
-  try {
-    const b = await (await fetch("/api/audit")).json();
-    const reviews = b.reviews.map((r) => `<tr><td>${esc(r.timestamp)}</td><td><b>${r.verdict === "release" ? "✓ released" : "✕ rejected"}</b> by ${esc(r.reviewer)}</td><td>${esc(r.reason)}</td><td>${esc(r.input.slice(0, 90))}</td></tr>`).join("");
-    const rows = b.audit.map((e) => `<tr><td>${esc(e.timestamp)}</td><td><span class="tag v-${e.decision}">${esc(e.decision)}</span></td><td>${esc(e.reason)}</td><td>${esc(e.input.slice(0, 90))}</td></tr>`).join("");
-    $("audit").innerHTML = `${reviews ? `<h2 style="margin-top:10px">Human reviews</h2><table><tr><th>Time</th><th>Verdict</th><th>Reason</th><th>Memo</th></tr>${reviews}</table>` : ""}
-      <h2 style="margin-top:16px">Gate decisions (latest first, from audit_log.jsonl)</h2>
-      ${rows ? `<table><tr><th>Time (UTC)</th><th>Decision</th><th>Reason</th><th>Memo</th></tr>${rows}</table>` : "No decisions yet."}`;
-  } catch (e) { $("audit").textContent = "Couldn't load the audit trail: " + e.message; }
+  try { AUD = await (await fetch("/api/audit")).json(); drawAudit(); }
+  catch (e) { $("atbl").innerHTML = `<div class="empty">Couldn't load the audit trail: ${esc(e.message)}</div>`; }
 }
-
-function updateCount() {
-  const n = $("text").value.length;
-  $("count").textContent = `${n.toLocaleString()} / 20,000`;
-  $("count").className = "count" + (n > MAX ? " over" : "");
+function drawAudit() {
+  if (!AUD) return;
+  const rows = [
+    ...AUD.reviews.map((r) => ({ts:r.timestamp, tag:`<span class="tag ${r.verdict === "release" ? "t-APPROVE" : "t-BLOCK"}">${r.verdict === "release" ? "RELEASED" : "REJECTED"}</span>`, why:`${esc(r.reviewer)}: ${esc(r.reason)}`, memo:r.input, kind:"REVIEW"})),
+    ...AUD.audit.map((e) => ({ts:e.timestamp, tag:`<span class="tag t-${e.decision}">${e.decision === "HOLD_FOR_REVIEW" ? "HOLD" : e.decision}</span>`, why:esc(e.reason), memo:e.input, kind:e.decision})),
+  ].filter((r) => !FILTER || r.kind === FILTER).sort((a, b) => b.ts.localeCompare(a.ts));
+  $("atbl").innerHTML = `<div class="tr-row h"><span>Time (UTC)</span><span>Outcome</span><span>Reason</span><span>Memo</span></div>` +
+    (rows.length ? rows.map((r) => `<div class="tr-row"><span class="ts">${esc(r.ts.replace("T", " ").slice(0, 19))}</span><span>${r.tag}</span><span class="why">${r.why}</span><span class="memo">${esc(r.memo)}</span></div>`).join("") : `<div class="empty">No entries yet.</div>`);
 }
+document.querySelectorAll(".fchip").forEach((b) => b.onclick = () => { document.querySelectorAll(".fchip").forEach((x) => x.setAttribute("aria-pressed", x === b)); FILTER = b.dataset.f; drawAudit(); });
 
+/* ---------- chrome ---------- */
+const CRUMB = {review:"Memo review", batch:"Gate simulation", audit:"Audit trail"};
+function setView(v) {
+  document.querySelectorAll(".nav button").forEach((b) => b.setAttribute("aria-current", b.dataset.view === v));
+  document.querySelectorAll(".view").forEach((s) => s.classList.toggle("on", s.id === "v-" + v));
+  $("crumb").innerHTML = `Matters <span>/</span> Mata v. Avianca: tolling motion <span>/</span> <b>${CRUMB[v]}</b>`;
+  if (v === "audit") loadAudit();
+}
+document.querySelectorAll(".nav button").forEach((b) => b.onclick = () => setView(b.dataset.view));
+function count() { const n = $("text").value.length; $("count").textContent = `${n.toLocaleString()} / 20,000`; $("count").classList.toggle("over", n > MAX); }
+let tt; function toast(m) { $("toast").textContent = m; $("toast").classList.add("on"); clearTimeout(tt); tt = setTimeout(() => $("toast").classList.remove("on"), 2400); }
 async function health() {
-  try { const r = await fetch("/health"); $("health").textContent = r.ok ? "● Gate online" : "● Gate error"; $("health").style.color = r.ok ? "var(--ok)" : "var(--bad)"; }
-  catch { $("health").textContent = "● Gate offline"; $("health").style.color = "var(--bad)"; }
+  try { const r = await fetch("/health"); const ok = r.ok; $("hdot").classList.toggle("off", !ok); $("htext").textContent = ok ? "Gate online" : "Gate error"; }
+  catch { $("hdot").classList.add("off"); $("htext").textContent = "Gate offline"; }
 }
-
-document.querySelectorAll("nav button").forEach((b) => b.onclick = () => {
-  document.querySelectorAll("nav button").forEach((x) => x.setAttribute("aria-selected", x === b));
-  for (const t of ["review", "batch", "audit"]) $("tab-" + t).classList.toggle("hidden", t !== b.dataset.tab);
-  if (b.dataset.tab === "audit") loadAudit();
+$("go").onclick = verify; $("edit").onclick = editMode; $("annot").onclick = (e) => { if (!e.target.closest("mark")) editMode(); };
+$("text").oninput = count; $("openpal").onclick = openPal; $("runall").onclick = runAll; $("refresh").onclick = loadAudit;
+document.addEventListener("keydown", (e) => {
+  const mod = e.metaKey || e.ctrlKey;
+  if (mod && e.key.toLowerCase() === "k") { e.preventDefault(); $("scrim").classList.contains("on") ? closePal() : openPal(); }
+  else if (mod && e.key === "Enter") { e.preventDefault(); verify(); }
+  else if (e.key === "Escape") { closePal(); pop.classList.remove("on"); }
+  else if (!mod && /^[123]$/.test(e.key) && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) setView({1:"review",2:"batch",3:"audit"}[e.key]);
 });
-$("go").onclick = run;
-$("clear").onclick = () => { $("text").value = ""; updateCount(); };
-$("text").oninput = updateCount;
-$("text").addEventListener("keydown", (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") run(); });
-$("runall").onclick = runAll;
-$("refresh").onclick = loadAudit;
-health(); loadSamples();
+idle(); health(); loadSamples(); setInterval(health, 15000);
 </script>
 </body>
 </html>
