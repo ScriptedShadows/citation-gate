@@ -160,6 +160,9 @@ mark.phrase{box-shadow:inset 0 -1.5px 0 var(--hold);background:linear-gradient(t
 .cite .tag{grid-row:1/3}
 .cite b{font:600 14px var(--serif)}
 .cite p{margin:0;color:var(--ink-2);font-size:12.5px}
+.fixbtn{grid-column:2;justify-self:start;margin-top:6px;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--brand);background:linear-gradient(#c8a96a1f,#c8a96a0d);color:var(--brand-ink);border-radius:6px;padding:5px 10px;font:600 12px var(--sans);transition:transform .08s,background .15s}
+.fixbtn:hover{background:#c8a96a33}.fixbtn:active{transform:scale(.97)}
+.fixbtn s{opacity:.6;font-weight:400}
 .tag{font:700 9.5px var(--sans);letter-spacing:.08em;padding:3px 6px;border-radius:4px;height:fit-content;white-space:nowrap}
 .t-verified{background:var(--ok-soft);color:var(--ok)}.t-fabricated,.t-misstated{background:var(--bad-soft);color:var(--bad)}.t-unverified,.t-check{background:var(--unk-soft);color:var(--unk)}
 .t-APPROVE{background:var(--ok-soft);color:var(--ok)}.t-HOLD_FOR_REVIEW{background:var(--hold-soft);color:var(--hold)}.t-BLOCK{background:var(--bad-soft);color:var(--bad)}
@@ -477,7 +480,7 @@ function render(r, text) {
       <input class="field" id="rreason" placeholder="Reason (required), e.g. Confirmed on Westlaw, 3d Cir. 2002" aria-label="Reason">
       <div class="row"><button class="btn ok sm" id="rel">Release to partner</button><button class="btn no sm" id="rej">Return to drafter</button></div></div>` : ""}
     <div class="sec"><h6>Authorities <span>${cites.length}</span></h6>
-      ${cites.length ? cites.map((c, i) => `<div class="cite" data-c="${i}"><span class="tag t-${c.status}">${i + 1} · ${LABEL[c.status] || c.status}</span><b>${esc(c.case)}</b><p>${esc(c.notes.join(" "))}</p></div>`).join("")
+      ${cites.length ? cites.map((c, i) => `<div class="cite" data-c="${i}"><span class="tag t-${c.status}">${i + 1} · ${LABEL[c.status] || c.status}</span><b>${esc(c.case)}</b><p>${esc(c.notes.join(" "))}</p>${c.fix ? `<button class="fixbtn" data-fix="${i}">✦ ${esc(c.fix.label)} <s>${esc(text.slice(c.fix.start, c.fix.end))}</s> → ${esc(c.fix.replacement)}</button>` : ""}</div>`).join("")
         : `<div class="note" style="margin:0">No case citations in this memo, so there's nothing to verify against the firm's lists. A memo without authority is fine to submit (policy rule 5).</div>`}
     </div>
     <div class="sec"><h6>Ezio signals</h6>${meters}</div>
@@ -487,6 +490,12 @@ function render(r, text) {
   $("annot").innerHTML = annotate(text, cites);
   $("doc").classList.add("annotated");
   $("edit").style.display = "";
+  document.querySelectorAll(".fixbtn").forEach((b) => b.onclick = (e) => {
+    e.stopPropagation();
+    const f = cites[b.dataset.fix].fix;
+    $("text").value = text.slice(0, f.start) + f.replacement + text.slice(f.end);
+    count(); toast("Correction applied from the firm's trusted list. Re-verifying…"); verify();
+  });
   document.querySelectorAll(".cite").forEach((el) => el.onclick = () => {
     const m = $("m" + el.dataset.c); if (!m) return;
     m.scrollIntoView({behavior:"smooth", block:"center"}); m.classList.remove("flash"); void m.offsetWidth; m.classList.add("flash");
@@ -534,7 +543,7 @@ document.addEventListener("mouseover", (e) => {
   } else {
     const c = (CURRENT.citations || [])[m.dataset.c]; if (!c) return;
     const col = {verified:"var(--ok)",fabricated:"var(--bad)",misstated:"var(--bad)"}[c.status] || "var(--unk)";
-    pop.innerHTML = `<div class="k" style="color:${col}">${LABEL[c.status] || c.status}</div><h5>${esc(c.case)}</h5>${c.notes.map((n) => `<p>${esc(n)}</p>`).join("")}`;
+    pop.innerHTML = `<div class="k" style="color:${col}">${LABEL[c.status] || c.status}</div><h5>${esc(c.case)}</h5>${c.notes.map((n) => `<p>${esc(n)}</p>`).join("")}${c.fix ? `<p style="color:var(--brand-ink);font-weight:600">✦ Suggested: ${esc(c.fix.replacement)}</p>` : ""}`;
   }
   const r = m.getBoundingClientRect();
   pop.style.left = Math.min(window.innerWidth - 356, Math.max(12, r.left)) + "px";

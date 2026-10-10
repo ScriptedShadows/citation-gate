@@ -11,6 +11,7 @@
 | 3 | **Cite and year check** against the trusted entry | `trusted_citations.json` | Catches near-miss citations (1813 vs 1803, page 138 vs 137) |
 | 4 | **Holding check (doctrine fingerprints)**: each trusted case's distinctive vocabulary is computed from the firm's one-line holdings at startup. A memo describing case A with case B's vocabulary is a misattribution; no overlap at all is a mismatch | trusted holdings | General: no practice wording is hard-coded |
 | 5 | **Overstatement / reversal**: absolute words ("all", "without exception") applied to a holding the firm records as qualified ("unless", "only"); antonym flips (admissible vs inadmissible) | trusted holdings | Catches subtle misstatements |
+| 5b | **Dropped requirement**: "without suspicion" when the holding turns on suspicion | trusted holdings | Catches holdings stripped of their condition |
 | 6 | **Advocacy language**: "slam dunk", "will absolutely", ALL-CAPS hype, "!!" ("clearly established" is excluded as a term of art) | rule 4 | Memos must be neutral |
 | 7 | **Ezio claims[]**: contradicted gives BLOCK; supported is accepted with no second opinion | Ezio | Covers constitutional and statutory claims our lists can't |
 | 8 | **Ezio dimensions**: tone / bias / agreement | Ezio | A GREEN tier can hide one bad dimension |
@@ -37,3 +38,6 @@ Decisions take the most severe level of all findings. Every finding is attached 
 
 ## Audit
 Every decision goes to `audit_log.jsonl` (input, full Ezio response, signals, per-citation results, decision, reason, evidence, timestamp). Every executed action goes to `actions.log`. Every human release or reject goes to `review_log.jsonl` with the reviewer and their reason.
+
+## Correction, not just rejection
+For a misstated cite, year, or misattributed holding, the wrapper returns a `fix` drawn from the firm's trusted list (for example "5 U.S. 137 (1813)" becomes "(1803)", or "Gideon" becomes "Mapp v. Ohio, 367 U.S. 643 (1961)"). The page applies the fix and **re-sends the memo through `POST /decide`**; the gate makes the new decision, never the browser.

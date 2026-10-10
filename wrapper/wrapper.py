@@ -109,14 +109,14 @@ established establishes requires require required found finds applies apply appl
 REPORTER = r"(?:U\.\s?S\.|N\.\s?Y\.(?:\s?\d?d)?|F\.\s?(?:\d?d|Supp\.(?:\s?\d?d)?)|S\.\s?Ct\.|L\.\s?Ed\.(?:\s?\d?d)?|N\.E\.(?:\s?\d?d)?)"
 CITE_RE = re.compile(r"\b(\d{1,4})\s+(" + REPORTER + r")\s+(\d{1,5})\b")
 WORD = r"[A-Z][A-Za-z.'&\-]*"
-CASE_RE = re.compile(r"\b(" + WORD + r"(?:\s+(?:" + WORD + r"|of|the|and|de|&))*)\s+v\.\s+(" + WORD + r"(?:\s+(?:" + WORD + r"|of|the|and|&))*)")
+CASE_RE = re.compile(r"\b(" + WORD + r"(?:\s+(?:" + WORD + r"|of|the|and|de|&))*)\s+(?:v\.|vs\.?)\s+(" + WORD + r"(?:\s+(?:" + WORD + r"|of|the|and|&))*)")
 LEADING = {"under", "in", "as", "see", "per", "citing", "following", "also", "cf.", "but", "and", "the", "while", "unlike", "like"}
 ADVOCACY = re.compile(r"slam dunk|\bclearly\b(?!\s+established)|\bobviously\b|\bundeniabl\w*|\bunquestionabl\w*|without (?:a|any) doubt"
                       r"|\bno doubt\b|\bguaranteed (?:win|victory|result)|\bwe guarantee\b|\bwill (?:absolutely|definitely|certainly|surely)\b|\babsolutely\b"
                       r"|can(?:'|no)t lose|\bsure win\b|\bairtight\b|\bopen and shut\b|\bdestroy\w*\b|\bamazing\b|\bincredible\b|!!", re.I)
 ABSOLUTE = re.compile(r"\b(all|every|any|always|never|without exception|in all cases|no exceptions?|unlimited|absolute)\b", re.I)
-QUALIFIER = re.compile(r"\b(unless|only|except|if|when|provided)\b", re.I)
-NEGATION = re.compile(r"\b(not|no longer|need not|never|isn't|aren't|doesn't|don't|cannot)\b", re.I)
+QUALIFIER = re.compile(r"\b(unless|only|except|if|when|provided|reasonabl\w*)\b", re.I)
+NEGATION = re.compile(r"\b(does not|do not|did not|need not|no longer|is not|are not|isn't|aren't|doesn't|don't)\b", re.I)
 ANTONYMS = [("inadmissible", "admissible"), ("violates", "does not violate"), ("protected", "unprotected")]
 LEGAL_CAPS = {"U.S.", "N.Y.", "LLC", "INC", "CORP", "FEDERAL"}
 
@@ -217,7 +217,7 @@ def find_case_mentions(text):
         if not free(m.start(), m.end()):
             continue
         # a cite right after a mention belongs to that mention
-        prev = [x for x in mentions if x["end"] <= m.start() and not text[x["end"]:m.start()].strip(" ,")]
+        prev = [x for x in mentions if x["end"] <= m.start() and not re.sub(r"[\s,]|\d", "", CITE_RE.sub("", text[x["end"]:m.start()]))]
         if prev:
             continue
         c = idx["by_cite"].get(_norm(m.group(0)))
@@ -235,7 +235,7 @@ def check_paralegal(text):
         nxt = mentions[i + 1]["start"] if i + 1 < len(mentions) else len(text)
         before, after = _sentence_window(text, m["start"], m["end"])
         after = after[: max(0, nxt - m["end"])] if nxt - m["end"] < len(after) else after
-        problems, status = [], "verified"
+        problems, status, fix = [], "verified", None
         if m["kind"] == "fabricated":
             status = "fabricated"
             problems.append((BLOCK, f"{m['case']} is on the firm's fabricated-citation list (Mata v. Avianca)."))
@@ -248,11 +248,16 @@ def check_paralegal(text):
             cite = CITE_RE.search(head)
             if cite and _norm(cite.group(0)) != _norm(c["citation"]):
                 status = "misstated"
+                fix = {"start": m["end"] + cite.start(), "end": m["end"] + cite.end(), "replacement": c["citation"],
+                       "label": f"Correct cite to {c['citation']}"}
                 other = idx["by_cite"].get(_norm(cite.group(0)))
                 problems.append((BLOCK, f"{c['case']} is {c['citation']}, not {cite.group(0)}" + (f" (that is {other['case']})." if other else ".")))
             year = re.search(r"\((?:[^()]*?\s)?(1[6-9]\d\d|20\d\d)\)", head) or (re.search(r"\b(1[6-9]\d\d|20\d\d)\b", head) if cite else None)
             if year and int(year.group(1)) != c["year"]:
                 status = "misstated"
+                if not fix:
+                    fix = {"start": m["end"] + year.start(1), "end": m["end"] + year.end(1), "replacement": str(c["year"]),
+                           "label": f"Correct year to {c['year']}"}
                 problems.append((BLOCK, f"{c['case']} was decided in {c['year']}, not {year.group(1)}."))
             claim = re.sub(CITE_RE, " ", after if len(_terms(after)) >= 3 else before + " " + after)
             claim = re.sub(r"\([^)]*\d{4}\)", " ", claim)
@@ -262,6 +267,10 @@ def check_paralegal(text):
             hold_text = c["holding"].lower()
             if len(rival[1]) >= 2 and len(rival[1]) > len(own):
                 status = "misstated"
+                r = idx["by_name"][rival[0]]
+                span_end = m["end"] + (year.end() if year else cite.end() if cite else 0)
+                fix = {"start": m["start"], "end": span_end, "label": f"Cite {r['case']} instead",
+                       "replacement": f"{r['case']}, {r['citation']} ({r['year']})" if (year or cite) else r["case"]}
                 problems.append((BLOCK, f"Holding misattributed: '{', '.join(sorted(rival[1]))}' describes {rival[0]}, not {c['case']} ({c['case']} held: {c['holding']})"))
             elif len(words) >= 3 and not own:
                 status = "misstated"
@@ -269,6 +278,10 @@ def check_paralegal(text):
             if ABSOLUTE.search(claim) and QUALIFIER.search(hold_text) and not QUALIFIER.search(claim):
                 status = "misstated"
                 problems.append((BLOCK, f"Overstated holding: memo says '{ABSOLUTE.search(claim).group(0)}', but {c['case']} is qualified: \"{c['holding']}\""))
+            for w_ in re.findall(r"\bwithout (?:any |a )?([a-z]+)", claim, re.I):
+                if _stem(w_) in _terms(c["holding"]):
+                    status = "misstated"
+                    problems.append((BLOCK, f"Drops a requirement: memo says 'without {w_}', but {c['case']} turns on it: \"{c['holding']}\""))
             for neg, pos in ANTONYMS:
                 if neg in hold_text and re.search(r"\b" + pos + r"\b", claim, re.I) and not re.search(r"\b" + neg + r"\b", claim, re.I):
                     status = "misstated"
@@ -279,7 +292,7 @@ def check_paralegal(text):
             if status == "verified":
                 problems.append((None, f"{c['case']}, {c['citation']} ({c['year']}) verified against the trusted list."))
         citations.append({"as_written": m["as_written"], "case": m["case"], "status": status,
-                          "start": m["start"], "end": m["end"], "notes": [p[1] for p in problems]})
+                          "start": m["start"], "end": m["end"], "notes": [p[1] for p in problems], "fix": fix})
         findings += [Finding(level, msg) for level, msg in problems if level]
     tone = ADVOCACY.findall(text) + [w for w in re.findall(r"\b[A-Z]{5,}\b", text) if w not in LEGAL_CAPS]
     if tone:
