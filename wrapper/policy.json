@@ -1,21 +1,24 @@
 {
-  "_help": "Your policy knobs. Every threshold needs a one-sentence 'why' (you'll be asked in the demo). evaluate.py warns while any 'why' still says TODO.",
+  "_help": "Paralegal persona: gate for submit_memo_to_partner. Every threshold has a one-sentence why.",
 
   "on_ezio_failure": "HOLD_FOR_REVIEW",
-  "on_ezio_failure_why": "TODO: if Ezio can't be reached, do you fail open (APPROVE) or fail closed (HOLD_FOR_REVIEW / BLOCK)? Why?",
+  "on_ezio_failure_why": "We fail closed: without Ezio, non-citation claims (e.g. what an Amendment says) are unchecked, so a human reviews; our citation check still runs and BLOCKs fabricated or misstated cases even while Ezio is down.",
 
-  "tier_decisions": { "GREEN": "APPROVE", "YELLOW": "HOLD_FOR_REVIEW", "RED": "BLOCK" },
-  "tier_decisions_why": "TODO: why does each tier map to that decision for your business?",
+  "tier_decisions": { "GREEN": "APPROVE", "YELLOW": "HOLD_FOR_REVIEW", "RED": "HOLD_FOR_REVIEW" },
+  "tier_decisions_why": "GREEN is never sufficient on its own (citation checks can still block); YELLOW/RED say something is off but the tier alone doesn't say what, so a human looks; hard BLOCKs come only from specific evidence (fabricated case, misstated cite, contradicted claim).",
+
+  "when_claim_contradicted": "BLOCK",
+  "when_claim_contradicted_why": "Rule 6: a claim Ezio's fact-check contradicts is a concrete, sourced error, and a partner relying on it is the exact harm we gate.",
 
   "dimension_minimums": {
-    "tone":      { "hold_below": 0, "why": "TODO" },
-    "bias":      { "hold_below": 0, "why": "TODO" },
-    "agreement": { "hold_below": 0, "why": "TODO" }
+    "tone":      { "hold_below": 60, "why": "Below 60 matches Ezio's own RED cutoff for a single dimension; memos must be neutral (rule 4), and a GREEN overall tier can hide one bad dimension." },
+    "bias":      { "hold_below": 60, "why": "A one-sided memo misleads the partner about litigation risk; 60 is the same RED cutoff, so ordinary analytical framing passes." },
+    "agreement": { "hold_below": 60, "why": "Low agreement means the draft echoes rather than analyzes; below the RED cutoff a human should confirm it isn't sycophantic." }
   },
 
   "when_accuracy_not_scored": "ignore",
-  "when_accuracy_not_scored_why": "TODO: 'not scored' means no claims were checked. Is that a problem for your persona?",
+  "when_accuracy_not_scored_why": "Rule 5: 'not scored' just means Ezio found no public claims; our citation lists are the accuracy check for case law, and a memo with no citations is fine to submit.",
 
   "when_accuracy_unavailable": "HOLD_FOR_REVIEW",
-  "when_accuracy_unavailable_why": "TODO: the fact-check service was down. What should happen?"
+  "when_accuracy_unavailable_why": "If the fact-check is down, a constitutional or statutory claim could be wrong with nobody checking it, so we hold rather than approve blind; fabricated citations are still blocked outright."
 }

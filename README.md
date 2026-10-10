@@ -225,3 +225,14 @@ python3 -m unittest test_contract test_harness
 ```
 
 The starter intentionally leaves `check_source_of_truth()` empty and policy justifications as TODOs. Passing these infrastructure tests is not a completed challenge solution.
+
+---
+
+## Our submission: Citation Gate (Paralegal)
+
+```bash
+python3 gate.py serve --persona paralegal      # persona page (open the printed URL)
+python3 gate.py practice --persona paralegal   # 16/16 exact, 15/15 failure drills
+python3 gate.py judge --persona paralegal --team "<team>"
+```
+Policy: [DECISION_POLICY.md](DECISION_POLICY.md). Logic: `wrapper/wrapper.py` (`check_paralegal`), UI: `wrapper/ui/persona.html`, review/audit endpoints: `wrapper/serve.py`.

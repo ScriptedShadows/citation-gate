@@ -1,79 +1,304 @@
 <!doctype html>
-<!--
-  YOUR PERSONA PAGE. This is a skeleton; the UI is yours to design (25 points, optional).
-  Any approach is fine: edit this file, replace it with a built React/Vue/Svelte app in this folder,
-  or write plain JS. wrapper/serve.py serves everything in wrapper/ui/, with persona.html at "/".
-  Offline only: no CDNs or external services at demo time.
-
-  WHAT THE PAGE MUST DO (what judges score)
-    1. SEND AN INPUT, GET A RESPONSE: a draft goes to POST /decide (your wrapper), and the page shows the
-       decision, the reason, the evidence, and whether the mock action ran.
-    2. SIMULATE THE ACTION FROM A TEST INPUT: let the user pick a sample input (GET /api/samples?persona=...),
-       send it, and show the gate working: APPROVE -> the action ran; HOLD/BLOCK -> the action did NOT run.
-    3. Make it usable by someone in your persona's job: clear risk, errors shown plainly, a review step.
-
-  RULES
-    - Decisions come only from POST /decide. Do not decide, call the mock, or run the action in the browser.
-    - Latest test-run results are NOT your job: run `python3 gate.py results` for the color-coded viewer.
--->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TODO: your page title</title>
+<title>Citation Gate</title>
 <style>
-  /* TODO: design it. Think about who uses this: the person who is about to send / submit / publish. */
-  body { font: 16px/1.5 system-ui, sans-serif; max-width: 44rem; margin: 2rem auto; padding: 0 1rem; }
-  textarea { width: 100%; min-height: 8rem; }
+:root{--bg:#f6f4ef;--panel:#fff;--ink:#1c1b19;--mute:#6b675f;--line:#e2ddd3;--accent:#24345c;
+--ok:#1f7a4d;--ok-bg:#e5f3ea;--hold:#9a6200;--hold-bg:#fbf0d9;--bad:#b3261e;--bad-bg:#fbe5e3;--unk:#5b4a9e;--unk-bg:#ece8f8}
+@media (prefers-color-scheme:dark){:root{--bg:#141413;--panel:#1d1d1b;--ink:#ece9e2;--mute:#a19c92;--line:#34322e;--accent:#9db0e0;
+--ok:#6fcf9b;--ok-bg:#16301f;--hold:#f0bf5f;--hold-bg:#33280f;--bad:#f2867d;--bad-bg:#3a1714;--unk:#b9a8f0;--unk-bg:#26213d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+header{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+header h1{font:600 18px/1.2 Georgia,"Times New Roman",serif;margin:0}
+header .sub{color:var(--mute);font-size:13px}
+#health{margin-left:auto;font-size:13px;padding:4px 10px;border-radius:999px;border:1px solid var(--line)}
+nav{display:flex;gap:4px;padding:0 24px;background:var(--panel);border-bottom:1px solid var(--line)}
+nav button{border:0;background:none;padding:10px 14px;font:inherit;color:var(--mute);cursor:pointer;border-bottom:2px solid transparent}
+nav button[aria-selected=true]{color:var(--ink);border-color:var(--accent);font-weight:600}
+main{max-width:1240px;margin:0 auto;padding:20px 24px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}main{padding:16px}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 10px}
+textarea{width:100%;min-height:220px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:15px/1.6 Georgia,serif;resize:vertical}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--panel);padding:9px 16px;border-radius:7px;font:600 14px inherit;font-family:inherit;cursor:pointer}
+.btn.ghost{background:none;color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.count{margin-left:auto;font-size:12px;color:var(--mute)}
+.count.over{color:var(--bad);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:5px 9px;font-size:12.5px;cursor:pointer;max-width:100%;text-align:left}
+.chip:hover{border-color:var(--accent)}
+.empty{color:var(--mute);text-align:center;padding:50px 10px}
+.verdict{display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:9px;margin-bottom:14px}
+.verdict .icon{font-size:26px;line-height:1;font-weight:700}
+.verdict .label{font-weight:700;letter-spacing:.04em;font-size:14px}
+.verdict .reason{margin-top:4px}
+.v-APPROVE{background:var(--ok-bg);color:var(--ok)} .v-HOLD_FOR_REVIEW{background:var(--hold-bg);color:var(--hold)} .v-BLOCK{background:var(--bad-bg);color:var(--bad)}
+.verdict .reason,.verdict .conseq{color:var(--ink)}
+.conseq{font-size:13px;margin-top:6px}
+.action{display:flex;gap:8px;align-items:center;padding:10px 12px;border:1px dashed var(--line);border-radius:8px;font-size:14px;margin-bottom:14px}
+.memo{font:15px/1.8 Georgia,serif;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);margin-bottom:14px;white-space:pre-wrap}
+mark{padding:1px 3px;border-radius:4px;color:inherit}
+mark sup{font:700 10px/1 -apple-system,sans-serif;margin-left:3px;letter-spacing:.03em}
+.s-verified{background:var(--ok-bg);border-bottom:2px solid var(--ok)} .s-verified sup{color:var(--ok)}
+.s-fabricated,.s-misstated{background:var(--bad-bg);border-bottom:2px solid var(--bad)} .s-fabricated sup,.s-misstated sup{color:var(--bad)}
+.s-unverified,.s-check{background:var(--unk-bg);border-bottom:2px dashed var(--unk)} .s-unverified sup,.s-check sup{color:var(--unk)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mute);font-weight:600;font-size:12px}
+.sig{display:grid;grid-template-columns:90px 1fr 44px;gap:8px;align-items:center;font-size:13px;margin:4px 0}
+.bar{height:7px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent)}
+.bar i.low{background:var(--bad)}
+ul.ev{margin:0;padding-left:18px;font-size:13.5px} ul.ev li{margin:3px 0}
+details summary{cursor:pointer;color:var(--mute);font-size:13px;margin:10px 0 6px}
+.review{border:1px solid var(--hold);border-radius:9px;padding:14px;margin-bottom:14px}
+.review input{width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;margin:6px 0}
+.err{background:var(--bad-bg);color:var(--bad);padding:10px 12px;border-radius:8px;margin-bottom:12px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s 0.8s linear infinite;vertical-align:-2px}
+@keyframes s{to{transform:rotate(360deg)}}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
+.col h3{margin:0 0 8px;font-size:14px}
+.mini{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;background:var(--panel);font-size:13px}
+.mini .t{font-family:Georgia,serif;font-size:13.5px;margin-bottom:6px}
+.mini .a{font-weight:600;font-size:12px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.03em}
+.hidden{display:none}
+.muted{color:var(--mute);font-size:13px}
 </style>
 </head>
 <body>
-<h1>TODO: name this screen for your persona's job</h1>
+<header>
+  <div>
+    <h1>⚖ Citation Gate</h1>
+    <div class="sub">Memo review before it goes to the partner: every case checked against the firm's trusted &amp; fabricated lists, plus Ezio's fact-check.</div>
+  </div>
+  <span id="health" role="status">checking…</span>
+</header>
+<nav role="tablist">
+  <button role="tab" aria-selected="true" data-tab="review">Review a memo</button>
+  <button role="tab" aria-selected="false" data-tab="batch">Run test memos</button>
+  <button role="tab" aria-selected="false" data-tab="audit">Audit trail</button>
+</nav>
+<main>
+  <section id="tab-review" class="grid">
+    <div>
+      <div class="card">
+        <h2>Draft memo</h2>
+        <label for="text" class="muted">Paste the memo text you're about to submit to the partner.</label>
+        <textarea id="text" placeholder="e.g. Under Gideon v. Wainwright, 372 U.S. 335 (1963), states must provide counsel to indigent defendants facing felony charges."></textarea>
+        <div class="row">
+          <button class="btn" id="go">Check &amp; submit to partner</button>
+          <button class="btn ghost" id="clear">Clear</button>
+          <span class="count" id="count">0 / 20,000</span>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h2>Or load a test memo</h2>
+        <div class="chips" id="samples"><span class="muted">loading samples…</span></div>
+      </div>
+    </div>
+    <div class="card" id="result" aria-live="polite">
+      <div class="empty">Submit a memo to see the gate decision, the evidence, and whether it reached the partner.</div>
+    </div>
+  </section>
 
-<!-- TODO (1): inputs. Text is required; context is a JSON object your persona rules may use. -->
-<label for="text">Draft</label>
-<textarea id="text"></textarea>
-<button id="check">Check</button>
+  <section id="tab-batch" class="hidden">
+    <div class="card" style="margin-bottom:16px">
+      <div class="row" style="margin-top:0">
+        <div><h2 style="margin:0">Simulate the action on test memos</h2>
+        <div class="muted">Sends every sample through <code>POST /decide</code>. Only approved memos run <code>submit_memo_to_partner</code>.</div></div>
+        <button class="btn" id="runall" style="margin-left:auto">Run all test memos</button>
+      </div>
+      <div id="batchstat" class="muted" style="margin-top:8px"></div>
+    </div>
+    <div class="cols">
+      <div class="col"><h3 style="color:var(--ok)">✓ Approved: sent to partner</h3><div id="c-APPROVE"></div></div>
+      <div class="col"><h3 style="color:var(--hold)">⏸ Held: waiting for a human</h3><div id="c-HOLD_FOR_REVIEW"></div></div>
+      <div class="col"><h3 style="color:var(--bad)">✕ Blocked: never reached the partner</h3><div id="c-BLOCK"></div></div>
+    </div>
+  </section>
 
-<!-- TODO (2): sample picker. Fill this from /api/samples (see loadSamples below). -->
-<select id="samples"></select>
-<button id="simulate">Simulate with this sample</button>
-
-<!-- TODO (3): present the result for a human, not as raw JSON. Replace this <pre>. -->
-<pre id="out"></pre>
+  <section id="tab-audit" class="hidden">
+    <div class="card">
+      <div class="row" style="margin-top:0"><h2 style="margin:0">Audit trail</h2><button class="btn ghost" id="refresh" style="margin-left:auto">Refresh</button></div>
+      <div id="audit" class="muted">loading…</div>
+    </div>
+  </section>
+</main>
 
 <script>
-// Set this to the persona you chose: customer_support | paralegal | financial_analyst
-const PERSONA = "customer_support";
-
-// Plumbing: the one call every version of this page makes. Returns {decision, reason, evidence, action_executed, ...}.
-async function decide(text, context = {}) {
-  const response = await fetch("/decide", { method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, persona: PERSONA, context }) });
-  const body = await response.json();
-  if (!response.ok) throw new Error(body.error || "Request failed");
-  return body;
-}
-
-// Plumbing: sample inputs from the practice set: [{id, text, context}, ...]
-async function loadSamples() {
-  const response = await fetch("/api/samples?persona=" + PERSONA);
-  return (await response.json()).samples;
-}
-
-// TODO: show the result. Decision, reason, and evidence are what a person needs to decide; also show
-// whether the action ran (result.action_executed). Handle loading and errors (including a slow or down Ezio).
-function showResult(result) {
-  document.getElementById("out").textContent = JSON.stringify(result, null, 2);
-}
-
-// TODO: wire the buttons. Disable them while a request is running; catch errors and show them.
-document.getElementById("check").onclick = async () => {
-  showResult(await decide(document.getElementById("text").value));
+const PERSONA = "paralegal";
+const MAX = 20000;
+const META = {
+  APPROVE: {icon: "✓", label: "APPROVED", conseq: "Memo goes to the partner as written."},
+  HOLD_FOR_REVIEW: {icon: "⏸", label: "HOLD FOR REVIEW", conseq: "Not sent. If approved as-is, the partner may rely on something nobody has verified."},
+  BLOCK: {icon: "✕", label: "BLOCKED", conseq: "Not sent. Submitting this risks citing a bad case to a court (see Mata v. Avianca, where counsel was sanctioned)."},
 };
+const STATUS = {verified: "VERIFIED", fabricated: "FABRICATED", misstated: "MISSTATED", unverified: "UNVERIFIED", check: "CHECK"};
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
 
-// TODO: populate #samples from loadSamples(), then make "Simulate" send the chosen sample's text and context
-// through decide() and show clearly whether the action ran.
+async function decide(text, context = {}) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 65000);
+  try {
+    const res = await fetch("/decide", {method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({text, context, persona: PERSONA}), signal: ctrl.signal});
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || `Wrapper returned HTTP ${res.status}`);
+    return body;
+  } catch (e) {
+    throw new Error(e.name === "AbortError" ? "No answer after 65 s: the wrapper or Ezio is stuck. Nothing was sent." : e.message);
+  } finally { clearTimeout(t); }
+}
+
+function highlight(text, cites) {
+  let out = "", i = 0;
+  for (const c of [...cites].sort((a, b) => a.start - b.start)) {
+    if (c.start < i) continue;
+    out += esc(text.slice(i, c.start));
+    out += `<mark class="s-${c.status}" title="${esc(c.notes.join(" "))}">${esc(text.slice(c.start, c.end))}<sup>${STATUS[c.status] || c.status}</sup></mark>`;
+    i = c.end;
+  }
+  return out + esc(text.slice(i));
+}
+
+function signalsHtml(s) {
+  if (!s || s.ezio === "unavailable") {
+    return `<div class="err">⚠ Ezio unavailable (${esc(s && s.error)}). Degraded mode: citations were still checked against the firm's lists; anything not clearly fabricated is held for a human.</div>`;
+  }
+  const bar = (k, v) => `<div class="sig"><span>${k}</span><div class="bar"><i class="${v < 60 ? "low" : ""}" style="width:${v}%"></i></div><span>${v}${v < 60 ? " ⚠" : ""}</span></div>`;
+  const claims = (s.claims || []).map((c) => `<li><b>${esc(c.verdict)}</b>: “${esc(c.text)}”${c.source ? ` <span class="muted">(${esc(c.source)})</span>` : ""}</li>`).join("");
+  return `<div class="muted" style="margin-bottom:6px">Overall <b>${esc(s.tier)} ${esc(s.score)}</b> · accuracy <b>${esc(s.accuracy)}</b>${s.accuracy === "not_scored" ? " (no public claims to fact-check; GREEN here doesn't prove the citations are real)" : ""}</div>
+    ${bar("Tone", s.tone)}${bar("Bias", s.bias)}${bar("Agreement", s.agreement)}
+    ${claims ? `<div style="margin-top:8px"><b style="font-size:13px">Ezio fact-checked claims</b><ul class="ev">${claims}</ul></div>` : ""}`;
+}
+
+function renderResult(r, text) {
+  const m = META[r.decision];
+  const cites = r.citations || [];
+  const rows = cites.map((c) => `<tr><td>${esc(c.as_written)}</td><td><span class="tag s-${c.status}">${STATUS[c.status] || c.status}</span></td><td>${esc(c.notes.join(" "))}</td></tr>`).join("");
+  $("result").innerHTML = `
+    <div class="verdict v-${r.decision}"><div class="icon" aria-hidden="true">${m.icon}</div>
+      <div><div class="label">${m.label}</div><div class="reason">${esc(r.reason)}</div><div class="conseq">${m.conseq}</div></div></div>
+    <div class="action">${r.action_executed
+      ? "📤 <b>submit_memo_to_partner</b> ran: the memo was delivered and logged in actions.log."
+      : "🛑 <b>submit_memo_to_partner</b> did <b>not</b> run: stopped at the gate before the action."}</div>
+    ${r.decision === "HOLD_FOR_REVIEW" ? `<div class="review" id="rev"><b>Reviewer decision</b>
+      <div class="muted">Your choice and reason go into the review log. Release sends the memo; reject sends it back to the drafter.</div>
+      <input id="revname" placeholder="Your name" value="Senior associate">
+      <input id="revreason" placeholder="Reason (required), e.g. Confirmed Harlan v. Pinecrest on Westlaw">
+      <div class="row"><button class="btn" id="release">Release to partner</button><button class="btn ghost" id="reject">Reject: back to drafter</button></div>
+      <div id="revout" class="muted"></div></div>` : ""}
+    <h2>Memo, citations highlighted</h2>
+    <div class="memo">${highlight(text, cites)}</div>
+    ${cites.length ? `<h2>Citation check (firm's trusted &amp; fabricated lists)</h2><table><tr><th>As written</th><th>Status</th><th>Evidence</th></tr>${rows}</table>` : `<p class="muted">No case citations found, so there is nothing to verify against the lists (rule 5: fine to submit).</p>`}
+    <h2 style="margin-top:16px">Ezio signals</h2>${signalsHtml(r.signals)}
+    <details><summary>All evidence (${(r.evidence || []).length})</summary><ul class="ev">${(r.evidence || []).map((e) => `<li>${esc(e)}</li>`).join("")}</ul></details>`;
+  if (r.decision === "HOLD_FOR_REVIEW") {
+    const send = async (verdict) => {
+      const reason = $("revreason").value.trim();
+      if (!reason) { $("revout").innerHTML = `<span style="color:var(--bad)">A reason is required for the audit log.</span>`; return; }
+      $("release").disabled = $("reject").disabled = true;
+      try {
+        const res = await fetch("/review", {method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({text, verdict, reason, reviewer: $("revname").value, original_decision: r.decision})});
+        const b = await res.json();
+        if (!res.ok) throw new Error(b.error);
+        $("revout").innerHTML = verdict === "release" ? `✓ Released by ${esc(b.reviewer)}. The memo was sent and the reason logged.` : `✕ Rejected by ${esc(b.reviewer)}. Not sent; the reason was logged.`;
+      } catch (e) { $("revout").textContent = "Review failed: " + e.message; $("release").disabled = $("reject").disabled = false; }
+    };
+    $("release").onclick = () => send("release");
+    $("reject").onclick = () => send("reject");
+  }
+}
+
+async function run() {
+  const text = $("text").value;
+  if (!text.trim()) { $("result").innerHTML = `<div class="err">Paste a memo first. An empty memo can't be checked.</div>`; return; }
+  if (text.length > MAX) { $("result").innerHTML = `<div class="err">Memo is ${text.length.toLocaleString()} characters; the gate accepts at most 20,000. Split it into sections.</div>`; return; }
+  $("go").disabled = true;
+  $("result").innerHTML = `<div class="empty"><span class="spin"></span> Checking citations and asking Ezio…<div class="muted" id="slow"></div></div>`;
+  const slow = setTimeout(() => { const s = $("slow"); if (s) s.textContent = "Ezio is slow; the gate retries for up to 45 s. Nothing is sent until there's a decision."; }, 7000);
+  try { renderResult(await decide(text), text); }
+  catch (e) { $("result").innerHTML = `<div class="err"><b>No decision. Memo NOT sent.</b><br>${esc(e.message)}</div>`; }
+  finally { clearTimeout(slow); $("go").disabled = false; }
+}
+
+let SAMPLES = [];
+async function loadSamples() {
+  try {
+    const res = await fetch(`/api/samples?persona=${PERSONA}`);
+    SAMPLES = (await res.json()).samples || [];
+    $("samples").innerHTML = SAMPLES.map((s, i) => `<button class="chip" data-i="${i}">${esc(s.text.slice(0, 70))}${s.text.length > 70 ? "…" : ""}</button>`).join("");
+    $("samples").querySelectorAll(".chip").forEach((b) => b.onclick = () => { $("text").value = SAMPLES[b.dataset.i].text; updateCount(); run(); });
+  } catch { $("samples").innerHTML = `<span class="muted">Couldn't load samples.</span>`; }
+}
+
+async function runAll() {
+  $("runall").disabled = true;
+  for (const k of Object.keys(META)) $("c-" + k).innerHTML = "";
+  let done = 0, sent = 0;
+  const queue = SAMPLES.map((s) => s);
+  const worker = async () => {
+    while (queue.length) {
+      const s = queue.shift();
+      try {
+        const r = await decide(s.text, s.context);
+        if (r.action_executed) sent++;
+        $("c-" + r.decision).insertAdjacentHTML("beforeend", `<div class="mini"><div class="t">${highlight(s.text, r.citations || [])}</div>
+          <div>${esc(r.reason)}</div><div class="a" style="margin-top:4px">${r.action_executed ? "📤 sent to partner" : "🛑 action not run"}</div></div>`);
+      } catch (e) {
+        $("c-BLOCK").insertAdjacentHTML("beforeend", `<div class="mini err">${esc(s.text.slice(0, 80))}: ${esc(e.message)}</div>`);
+      }
+      $("batchstat").textContent = `${++done}/${SAMPLES.length} decided · ${sent} memo(s) sent · ${done - sent} stopped at the gate`;
+    }
+  };
+  $("batchstat").innerHTML = `<span class="spin"></span> running…`;
+  await Promise.all([worker(), worker(), worker(), worker()]);
+  $("runall").disabled = false;
+}
+
+async function loadAudit() {
+  try {
+    const b = await (await fetch("/api/audit")).json();
+    const reviews = b.reviews.map((r) => `<tr><td>${esc(r.timestamp)}</td><td><b>${r.verdict === "release" ? "✓ released" : "✕ rejected"}</b> by ${esc(r.reviewer)}</td><td>${esc(r.reason)}</td><td>${esc(r.input.slice(0, 90))}</td></tr>`).join("");
+    const rows = b.audit.map((e) => `<tr><td>${esc(e.timestamp)}</td><td><span class="tag v-${e.decision}">${esc(e.decision)}</span></td><td>${esc(e.reason)}</td><td>${esc(e.input.slice(0, 90))}</td></tr>`).join("");
+    $("audit").innerHTML = `${reviews ? `<h2 style="margin-top:10px">Human reviews</h2><table><tr><th>Time</th><th>Verdict</th><th>Reason</th><th>Memo</th></tr>${reviews}</table>` : ""}
+      <h2 style="margin-top:16px">Gate decisions (latest first, from audit_log.jsonl)</h2>
+      ${rows ? `<table><tr><th>Time (UTC)</th><th>Decision</th><th>Reason</th><th>Memo</th></tr>${rows}</table>` : "No decisions yet."}`;
+  } catch (e) { $("audit").textContent = "Couldn't load the audit trail: " + e.message; }
+}
+
+function updateCount() {
+  const n = $("text").value.length;
+  $("count").textContent = `${n.toLocaleString()} / 20,000`;
+  $("count").className = "count" + (n > MAX ? " over" : "");
+}
+
+async function health() {
+  try { const r = await fetch("/health"); $("health").textContent = r.ok ? "● Gate online" : "● Gate error"; $("health").style.color = r.ok ? "var(--ok)" : "var(--bad)"; }
+  catch { $("health").textContent = "● Gate offline"; $("health").style.color = "var(--bad)"; }
+}
+
+document.querySelectorAll("nav button").forEach((b) => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach((x) => x.setAttribute("aria-selected", x === b));
+  for (const t of ["review", "batch", "audit"]) $("tab-" + t).classList.toggle("hidden", t !== b.dataset.tab);
+  if (b.dataset.tab === "audit") loadAudit();
+});
+$("go").onclick = run;
+$("clear").onclick = () => { $("text").value = ""; updateCount(); };
+$("text").oninput = updateCount;
+$("text").addEventListener("keydown", (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") run(); });
+$("runall").onclick = runAll;
+$("refresh").onclick = loadAudit;
+health(); loadSamples();
 </script>
 </body>
 </html>

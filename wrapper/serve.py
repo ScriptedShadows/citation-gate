@@ -5,8 +5,23 @@ from dataclasses import asdict
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+import audit
 import mock_actions
 from wrapper import APPROVE, decide
+
+REVIEW_LOG = audit.LOG.parent / "review_log.jsonl"
+
+
+def tail_jsonl(path, n=40):
+    if not path.exists():
+        return []
+    out = []
+    for line in path.read_text().splitlines()[-n:]:
+        try:
+            out.append(json.loads(line))
+        except ValueError:
+            pass
+    return out[::-1]
 
 UI_DIR = Path(__file__).parent / "ui"
 PERSONAS_DIR = Path(__file__).resolve().parent.parent / "personas"
@@ -54,6 +69,9 @@ class Handler(BaseHTTPRequestHandler):
             if persona not in PERSONAS:
                 return self.send_json(400, {"error": "Unknown persona"})
             return self.send_json(200, {"samples": samples(persona)})
+        if route == "/api/audit":
+            entries = [{k: v for k, v in e.items() if k not in ("ezio", "citations")} for e in tail_jsonl(audit.LOG)]
+            return self.send_json(200, {"audit": entries, "reviews": tail_jsonl(REVIEW_LOG), "actions": tail_jsonl(mock_actions.LOG, 20)})
         served = ui_file(route)
         if served:
             raw, content_type = served
@@ -65,7 +83,31 @@ class Handler(BaseHTTPRequestHandler):
             return
         self.send_json(404, {"error": "Unknown endpoint"})
 
+    def review(self):
+        """Human-in-the-loop: a reviewer releases or rejects a HOLD_FOR_REVIEW memo, with a logged reason."""
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+            p = json.loads(self.rfile.read(length)) if 0 < length <= 1_000_000 else {}
+            text, verdict, reason = p.get("text"), p.get("verdict"), (p.get("reason") or "").strip()
+            if not isinstance(text, str) or not text.strip() or verdict not in ("release", "reject") or not reason:
+                raise ValueError
+        except (ValueError, OSError):
+            return self.send_json(400, {"error": "Supply text, verdict (release|reject) and a non-empty reason"})
+        from datetime import datetime, timezone
+        entry = {"timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"), "input": text,
+                 "original_decision": p.get("original_decision"), "verdict": verdict,
+                 "reviewer": (p.get("reviewer") or "reviewer").strip()[:60], "reason": reason[:1000]}
+        with REVIEW_LOG.open("a") as f:
+            f.write(json.dumps(entry) + "\n")
+        released = verdict == "release" and p.get("original_decision") == "HOLD_FOR_REVIEW"
+        if released:  # only a HOLD can be released; a BLOCK never reaches the partner
+            mock_actions._record("submit_memo_to_partner", memo=text, citations=[],
+                                 released_by_reviewer=entry["reviewer"], review_reason=entry["reason"])
+        self.send_json(200, {**entry, "action_executed": released})
+
     def do_POST(self):
+        if self.path == "/review":
+            return self.review()
         if self.path != "/decide":
             return self.send_json(404, {"error": "Unknown endpoint"})
         self.connection.settimeout(10)
