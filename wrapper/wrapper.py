@@ -114,7 +114,7 @@ LEADING = {"under", "in", "as", "see", "per", "citing", "following", "also", "cf
 ADVOCACY = re.compile(r"slam dunk|\bclearly\b(?!\s+established)|\bobviously\b|\bundeniabl\w*|\bunquestionabl\w*|without (?:a|any) doubt"
                       r"|\bno doubt\b|\bguaranteed (?:win|victory|result)|\bwe guarantee\b|\bwill (?:absolutely|definitely|certainly|surely)\b|\babsolutely\b"
                       r"|can(?:'|no)t lose|\bsure win\b|\bairtight\b|\bopen and shut\b|\bdestroy\w*\b|\bamazing\b|\bincredible\b|!!", re.I)
-ABSOLUTE = re.compile(r"\b(all|every|any|always|never|without exception|in all cases|no exceptions?|unlimited|absolute)\b", re.I)
+ABSOLUTE = re.compile(r"\b(all|every|any|always|never|without exception|in all cases|no exceptions?|unlimited|absolute|regardless)\b", re.I)
 QUALIFIER = re.compile(r"\b(unless|only|except|if|when|provided|reasonabl\w*)\b", re.I)
 NEGATION = re.compile(r"\b(does not|do not|did not|need not|no longer|is not|are not|isn't|aren't|doesn't|don't)\b", re.I)
 ANTONYMS = [("inadmissible", "admissible"), ("violates", "does not violate"), ("protected", "unprotected")]
@@ -123,11 +123,11 @@ LEGAL_CAPS = {"U.S.", "N.Y.", "LLC", "INC", "CORP", "FEDERAL"}
 
 def _stem(w):
     w = w.lower().strip(".,;:()'\"")
+    if len(w) > 3 and w.endswith("s") and not w.endswith(("ss", "us")):
+        w = w[:-1]
     for suf in ("ing", "ed"):
         if len(w) > 5 and w.endswith(suf):
             return w[: -len(suf)]
-    if len(w) > 3 and w.endswith("s") and not w.endswith(("ss", "us")):
-        return w[:-1]
     return w
 
 
@@ -275,7 +275,13 @@ def check_paralegal(text):
             elif len(words) >= 3 and not own:
                 status = "misstated"
                 problems.append((BLOCK, f"The stated holding doesn't match the firm's summary of {c['case']}: \"{c['holding']}\""))
-            if ABSOLUTE.search(claim) and QUALIFIER.search(hold_text) and not QUALIFIER.search(claim):
+            requirement = QUALIFIER.search(hold_text) or re.search(r"\bmust\b", hold_text)
+            if status == "verified" and ABSOLUTE.search(claim) and requirement and len(own) * 3 < len(idx["distinct"][c["case"]]) \
+                    and not (QUALIFIER.search(hold_text) and QUALIFIER.search(claim)):
+                status = "misstated"
+                problems.append((BLOCK, f"Overstated holding: memo says '{ABSOLUTE.search(claim).group(0)}' but omits what {c['case']} requires: \"{c['holding']}\""))
+            elif ABSOLUTE.search(claim) and QUALIFIER.search(hold_text) and not QUALIFIER.search(claim) \
+                    and len(own) * 2 < len(idx["distinct"][c["case"]]):
                 status = "misstated"
                 problems.append((BLOCK, f"Overstated holding: memo says '{ABSOLUTE.search(claim).group(0)}', but {c['case']} is qualified: \"{c['holding']}\""))
             for w_ in re.findall(r"\bwithout (?:any |a )?([a-z]+)", claim, re.I):

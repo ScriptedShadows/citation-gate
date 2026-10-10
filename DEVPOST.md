@@ -26,7 +26,7 @@ A legal-tech review console built for the person about to hit send: the memo is 
 - Practice set: **8/8 bad caught, 0/8 false blocks, 16/16 exact**
 - Failure drills: **15/15** (down, rate-limited, server error, malformed, unavailable, slow)
 - 29/29 additional unseen stretch-style memos decided correctly (parallel cites, short names, near-miss cites, misattributed and overstated holdings)
-- Final held-out run: see attached `results/<team>.json` and `results/<team>.report.md`
+- **Final held-out run: 50.0 / 50 measured**: core 6/6 caught, 0/6 false blocks, 12/12 exact; stretch 6/6; failure drills 15/15 (`results/Citation Gate.json`, `results/Citation Gate.report.md`)
 
 ## How we built it
 Python 3 standard library only, on the provided Approval-Gate starter. Logic in `wrapper/wrapper.py` (`check_paralegal`), policy in `wrapper/policy.json`, review and audit endpoints in `wrapper/serve.py`, UI in `wrapper/ui/persona.html` (vanilla JS, no build step). One-page decision policy: `DECISION_POLICY.md`.

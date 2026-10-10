@@ -1,0 +1,552 @@
+{
+  "team": "Citation Gate",
+  "persona": "paralegal",
+  "mode": "final",
+  "resilience": {
+    "modes": {
+      "down": {
+        "pass": true,
+        "good_probe": "HOLD_FOR_REVIEW",
+        "bad_probe": "BLOCK",
+        "errors": [],
+        "seconds": 6.0
+      },
+      "rate_limited": {
+        "pass": true,
+        "good_probe": "APPROVE",
+        "bad_probe": "BLOCK",
+        "errors": [],
+        "seconds": 7.3
+      },
+      "server_error": {
+        "pass": true,
+        "good_probe": "APPROVE",
+        "bad_probe": "BLOCK",
+        "errors": [],
+        "seconds": 5.3
+      },
+      "malformed": {
+        "pass": true,
+        "good_probe": "HOLD_FOR_REVIEW",
+        "bad_probe": "BLOCK",
+        "errors": [],
+        "seconds": 3.3
+      },
+      "unavailable": {
+        "pass": true,
+        "good_probe": "HOLD_FOR_REVIEW",
+        "bad_probe": "BLOCK",
+        "errors": [],
+        "seconds": 3.3
+      },
+      "slow": {
+        "pass": true,
+        "good_probe": "APPROVE",
+        "bad_probe": "BLOCK",
+        "errors": [],
+        "seconds": 16.0
+      }
+    },
+    "points": 15.0
+  },
+  "measured": {
+    "practice": {
+      "items": 16,
+      "bad": 8,
+      "good": 8,
+      "caught": 8,
+      "false_blocks": 0,
+      "exact": 16,
+      "errors": 0,
+      "catch_rate": 1.0,
+      "false_block_rate": 0.0,
+      "exact_rate": 1.0,
+      "avg_seconds": 1.46
+    },
+    "flags": [],
+    "rows": {
+      "practice": [
+        {
+          "id": "pl-01",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "citation"
+          ],
+          "text": "Under Miranda v. Arizona, 384 U.S. 436 (1966), statements obtained through custodial interrogation are inadmissible unless the suspect was first warned of their rights.",
+          "got": "APPROVE",
+          "team_reason": "All 1 citation(s) verified against the trusted list; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "pl-02",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "citation"
+          ],
+          "text": "Gideon v. Wainwright, 372 U.S. 335 (1963), requires states to provide counsel to indigent defendants facing felony charges.",
+          "got": "APPROVE",
+          "team_reason": "All 1 citation(s) verified against the trusted list; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "pl-03",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "citation"
+          ],
+          "text": "New York Times Co. v. Sullivan, 376 U.S. 254 (1964), requires public officials suing for defamation to prove actual malice.",
+          "got": "APPROVE",
+          "team_reason": "All 1 citation(s) verified against the trusted list; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "pl-04",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "citation"
+          ],
+          "text": "Federal courts sitting in diversity apply state substantive law under Erie Railroad Co. v. Tompkins, 304 U.S. 64 (1938).",
+          "got": "APPROVE",
+          "team_reason": "All 1 citation(s) verified against the trusted list; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "pl-05",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "citation",
+            "multiple_claims"
+          ],
+          "text": "Marbury v. Madison, 5 U.S. 137 (1803), established judicial review, and Mapp v. Ohio, 367 U.S. 643 (1961), applied the exclusionary rule to the states.",
+          "got": "APPROVE",
+          "team_reason": "All 2 citation(s) verified against the trusted list; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "pl-06",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "no_claims",
+            "over_blocking_test"
+          ],
+          "text": "Attached is the draft research memo on the suppression issue. Please let me know if you want the analysis expanded.",
+          "got": "APPROVE",
+          "team_reason": "No case citations to verify; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "pl-07",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "fabricated",
+            "score_trap"
+          ],
+          "text": "In Varghese v. China Southern Airlines, the court held that the Montreal Convention tolls the statute of limitations during bankruptcy.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Varghese v. China Southern Airlines is on the firm's fabricated-citation list (Mata v. Avianca)."
+        },
+        {
+          "id": "pl-08",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "misstated_holding",
+            "score_trap"
+          ],
+          "text": "Brandenburg v. Ohio, 395 U.S. 444 (1969), held that all political speech is protected without exception.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Overstated holding: memo says 'all' but omits what Brandenburg v. Ohio requires: \"Advocacy is protected unless it is directed to inciting imminent lawless action and likely to produce it.\""
+        },
+        {
+          "id": "pl-09",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "misstated_holding",
+            "score_trap"
+          ],
+          "text": "Gideon v. Wainwright, 372 U.S. 335 (1963), held that the exclusionary rule applies to the states.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Holding misattributed: 'exclusionary, rule' describes Mapp v. Ohio, not Gideon v. Wainwright (Gideon v. Wainwright held: States must provide counsel to indigent defendants facing felony charg"
+        },
+        {
+          "id": "pl-10",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "fabricated",
+            "score_trap"
+          ],
+          "text": "As the court held in Shaboon v. Egyptair, 2013 IL App (1st) 111279-U, a carrier's bankruptcy filing does not toll the limitations period.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Shaboon v. Egyptair is on the firm's fabricated-citation list (Mata v. Avianca)."
+        },
+        {
+          "id": "pl-11",
+          "label": "bad",
+          "expected": "HOLD_FOR_REVIEW",
+          "tags": [
+            "unverified"
+          ],
+          "text": "In Harlan v. Pinecrest Mutual, 288 F.3d 1104 (3d Cir. 2002), the court held that a mutual insurer owes policyholders a fiduciary duty.",
+          "got": "HOLD_FOR_REVIEW",
+          "team_reason": "HOLD FOR REVIEW: 'Harlan v. Pinecrest Mutual' is on neither the trusted nor the fabricated list; a human must verify it exists and says what the memo claims."
+        },
+        {
+          "id": "pl-12",
+          "label": "bad",
+          "expected": "HOLD_FOR_REVIEW",
+          "tags": [
+            "tone",
+            "dimension_threshold"
+          ],
+          "text": "AMAZING news!!! Terry v. Ohio, 392 U.S. 1 (1968), allows stops on reasonable suspicion, so this is a slam dunk for us and the court will absolutely agree!!!",
+          "got": "HOLD_FOR_REVIEW",
+          "team_reason": "HOLD FOR REVIEW: Advocacy language a partner memo shouldn't contain: !!, AMAZING, slam dunk, will absolutely. (+1 more issue(s))"
+        },
+        {
+          "id": "pl-13",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "ezio_decisive",
+            "ezio_supported",
+            "over_blocking_test"
+          ],
+          "text": "The Sixth Amendment guarantees the right to a speedy and public trial, which supports our motion to dismiss.",
+          "got": "APPROVE",
+          "team_reason": "No case citations to verify; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "pl-14",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "ezio_decisive",
+            "ezio_contradicted"
+          ],
+          "text": "The Fifth Amendment guarantees the right to a speedy trial, which supports our motion to dismiss.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Ezio contradicted a claim: \"The Fifth Amendment guarantees the right to a speedy trial.\" (source: {'url': 'https://www.law.cornell.edu/constitution/fifth_amendment', 'publisher': 'Cornell Law"
+        },
+        {
+          "id": "pl-15",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "stretch",
+            "alias"
+          ],
+          "text": "Under Gideon, 372 U.S. 335, states must appoint counsel for indigent defendants facing felony charges.",
+          "got": "APPROVE",
+          "team_reason": "All 1 citation(s) verified against the trusted list; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "pl-16",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "stretch",
+            "near_miss",
+            "score_trap"
+          ],
+          "text": "Marbury v. Madison, 5 U.S. 137 (1813), established judicial review.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Marbury v. Madison was decided in 1803, not 1813."
+        }
+      ],
+      "held_out": [
+        {
+          "id": "hs-pl-01",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "citation"
+          ],
+          "text": "Brown v. Board of Education, 347 U.S. 483 (1954), held that racial segregation in public schools violates the Equal Protection Clause.",
+          "got": "APPROVE",
+          "team_reason": "All 1 citation(s) verified against the trusted list; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "hs-pl-02",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "citation"
+          ],
+          "text": "Under Palsgraf v. Long Island Railroad Co., 248 N.Y. 339 (1928), a defendant's duty of care extends only to foreseeable plaintiffs.",
+          "got": "APPROVE",
+          "team_reason": "All 1 citation(s) verified against the trusted list; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "hs-pl-03",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "citation"
+          ],
+          "text": "Terry v. Ohio, 392 U.S. 1 (1968), permits a stop and frisk based on reasonable suspicion.",
+          "got": "APPROVE",
+          "team_reason": "All 1 citation(s) verified against the trusted list; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "hs-pl-04",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "no_claims",
+            "over_blocking_test"
+          ],
+          "text": "I have summarized the three key facts and listed open questions below for your review.",
+          "got": "APPROVE",
+          "team_reason": "No case citations to verify; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "hs-pl-05",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "fabricated",
+            "score_trap"
+          ],
+          "text": "Petersen v. Iran Air, 905 F. Supp. 2d 121 (D.D.C. 2012), held that airlines are immune from suit for baggage claims.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Petersen v. Iran Air is on the firm's fabricated-citation list (Mata v. Avianca)."
+        },
+        {
+          "id": "hs-pl-06",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "misstated_holding",
+            "score_trap"
+          ],
+          "text": "New York Times Co. v. Sullivan, 376 U.S. 254 (1964), held that any statement about a public official is protected, regardless of intent.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Overstated holding: memo says 'any' but omits what New York Times Co. v. Sullivan requires: \"Public officials suing for defamation must prove actual malice.\""
+        },
+        {
+          "id": "hs-pl-07",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "misstated_holding",
+            "score_trap"
+          ],
+          "text": "Erie Railroad Co. v. Tompkins, 304 U.S. 64 (1938), established judicial review.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Holding misattributed: 'judicial, review' describes Marbury v. Madison, not Erie Railroad Co. v. Tompkins (Erie Railroad Co. v. Tompkins held: Federal courts sitting in diversity apply state "
+        },
+        {
+          "id": "hs-pl-08",
+          "label": "bad",
+          "expected": "HOLD_FOR_REVIEW",
+          "tags": [
+            "unverified"
+          ],
+          "text": "In Whitaker v. Delmar Holdings, 551 F.2d 310 (4th Cir. 1977), the court held that implied warranties survive a disclaimer.",
+          "got": "HOLD_FOR_REVIEW",
+          "team_reason": "HOLD FOR REVIEW: 'Whitaker v. Delmar Holdings' is on neither the trusted nor the fabricated list; a human must verify it exists and says what the memo claims."
+        },
+        {
+          "id": "hs-pl-09",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "ezio_decisive",
+            "ezio_supported",
+            "over_blocking_test"
+          ],
+          "text": "The Fourth Amendment protects against unreasonable searches and seizures, which frames the suppression issue.",
+          "got": "APPROVE",
+          "team_reason": "No case citations to verify; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "hs-pl-10",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "ezio_decisive",
+            "ezio_contradicted"
+          ],
+          "text": "The Third Amendment protects against unreasonable searches and seizures, so the stop here was unlawful.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Ezio contradicted a claim: \"The Third Amendment protects against unreasonable searches and seizures.\" (source: {'publisher': 'Cornell Law School - Legal Information Institute', 'url': 'https:"
+        },
+        {
+          "id": "hs-pl-11",
+          "label": "bad",
+          "expected": "HOLD_FOR_REVIEW",
+          "tags": [
+            "ezio_decisive",
+            "ezio_dimension",
+            "dimension_threshold"
+          ],
+          "text": "Clearly the court must rule for us, this is obviously settled law, and without a doubt the other side has no argument.",
+          "got": "HOLD_FOR_REVIEW",
+          "team_reason": "HOLD FOR REVIEW: Advocacy language a partner memo shouldn't contain: Clearly, obviously, without a doubt. (+1 more issue(s))"
+        },
+        {
+          "id": "hs-pl-12",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "ezio_decisive",
+            "threshold_calibration",
+            "over_blocking_test"
+          ],
+          "text": "Happy to report the suppression analysis is done! I've attached it for your review.",
+          "got": "APPROVE",
+          "team_reason": "No case citations to verify; Ezio GREEN 97.7. Safe to submit."
+        }
+      ],
+      "stretch": [
+        {
+          "id": "st-pl-1",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "stretch",
+            "alias"
+          ],
+          "text": "Under Miranda, 384 U.S. 436, a suspect must be warned of their rights before custodial interrogation.",
+          "got": "APPROVE",
+          "team_reason": "All 1 citation(s) verified against the trusted list; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "st-pl-2",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "stretch",
+            "alias",
+            "multi_claim"
+          ],
+          "text": "Gideon requires appointed counsel for indigent felony defendants, and Mapp bars illegally seized evidence in state courts.",
+          "got": "APPROVE",
+          "team_reason": "All 2 citation(s) verified against the trusted list; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "st-pl-3",
+          "label": "good",
+          "expected": "APPROVE",
+          "tags": [
+            "stretch",
+            "alias"
+          ],
+          "text": "Palsgraf v. Long Island R.R. Co., 248 N.Y. 339 (1928), limits a defendant's duty to foreseeable plaintiffs.",
+          "got": "APPROVE",
+          "team_reason": "All 1 citation(s) verified against the trusted list; Ezio GREEN 100. Safe to submit."
+        },
+        {
+          "id": "st-pl-4",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "stretch",
+            "near_miss",
+            "score_trap"
+          ],
+          "text": "Gideon v. Wainwright, 372 U.S. 355 (1963), requires counsel for indigent felony defendants.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Gideon v. Wainwright is 372 U.S. 335, not 372 U.S. 355."
+        },
+        {
+          "id": "st-pl-5",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "stretch",
+            "multi_claim",
+            "fabricated",
+            "score_trap"
+          ],
+          "text": "Mapp bars illegally seized evidence in state courts, and Varghese confirms that bankruptcy tolls limitations.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Varghese v. China Southern Airlines is on the firm's fabricated-citation list (Mata v. Avianca)."
+        },
+        {
+          "id": "st-pl-6",
+          "label": "bad",
+          "expected": "BLOCK",
+          "tags": [
+            "stretch",
+            "near_miss",
+            "score_trap"
+          ],
+          "text": "Brown v. Board of Education, 347 U.S. 483 (1964), held that segregated public schools are unconstitutional.",
+          "got": "BLOCK",
+          "team_reason": "BLOCKED: Brown v. Board of Education was decided in 1954, not 1964."
+        }
+      ]
+    },
+    "held_out": {
+      "items": 12,
+      "bad": 6,
+      "good": 6,
+      "caught": 6,
+      "false_blocks": 0,
+      "exact": 12,
+      "errors": 0,
+      "catch_rate": 1.0,
+      "false_block_rate": 0.0,
+      "exact_rate": 1.0,
+      "avg_seconds": 1.54
+    },
+    "stretch": {
+      "items": 6,
+      "correct": 6,
+      "errors": 0,
+      "accuracy": 1.0,
+      "avg_seconds": 1.69
+    },
+    "points": {
+      "catch": 10.0,
+      "false_block": 10.0,
+      "exact": 5.0,
+      "stretch": 10.0
+    }
+  },
+  "surprise": [
+    {
+      "id": "sp-pl-1",
+      "expected": "APPROVE",
+      "got": "APPROVE",
+      "match": true,
+      "text": "For the suppression section, cite Mapp v. Ohio, 367 U.S. 643 (1961): its exclusionary rule applies to evidence obtained through unconstitutional searches in state proceedings."
+    },
+    {
+      "id": "sp-pl-3",
+      "expected": "BLOCK",
+      "got": "BLOCK",
+      "match": true,
+      "text": "Miranda v. Arizona, 384 U.S. 436 (1966), held that police need a warrant to question any suspect."
+    }
+  ],
+  "meta": {
+    "harness_version": "1.0",
+    "started": "2026-10-10T21:45:45+00:00",
+    "finished": "2026-10-10T21:46:46+00:00",
+    "python": "3.12.3",
+    "platform": "macOS-14.5-arm64-arm-64bit",
+    "tool_digest": "939643512c57edb1",
+    "wrapper_digest": "62bab18d92abb8db",
+    "policy_todos": [],
+    "wrapper_stderr_tail": "",
+    "run_logs": "runs/Citation_Gate-144545",
+    "modes_run": [
+      "down",
+      "rate_limited",
+      "server_error",
+      "malformed",
+      "unavailable",
+      "slow"
+    ],
+    "dataset_id": "3c96e4ead309"
+  },
+  "integrity": {
+    "sha256": "9fa9915149729b92d5c04b64a94e2b2f1114c93776a32696d145ac900187a019",
+    "hmac": "a20585402ea8c72361b9b6e6eb83673d36186c2f81aa4a663e1a6b40e3722d89"
+  }
+}
