@@ -219,6 +219,27 @@ details[open] summary{margin-bottom:8px}
 .bcard .f{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--line-2);font:11px var(--mono);color:var(--mute)}
 .bcard .f .y{color:var(--ok)}.bcard .f .x{color:var(--bad)}
 
+/* ---------- flow ---------- */
+.flow{max-width:1176px;margin:16px auto 0;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:18px 22px;display:grid;grid-template-columns:120px 1fr 132px 1fr 132px;align-items:center;gap:0}
+@media (max-width:1100px){.flow{margin:16px 32px 0}}
+.node{text-align:center;position:relative;z-index:2}
+.node .box{width:64px;height:64px;margin:0 auto 8px;border-radius:14px;display:grid;place-items:center;border:1px solid var(--line);background:var(--bg);transition:transform .2s var(--ease),box-shadow .3s}
+.node .box svg{width:26px;height:26px}
+.node b{display:block;font:500 22px/1 var(--serif);font-variant-numeric:tabular-nums}
+.node small{font-size:11.5px;color:var(--mute)}
+.node.gate .box{background:var(--ink);color:var(--paper);border-color:var(--ink);width:72px;height:72px}
+.node.gate.hit .box{animation:thud .35s var(--ease)}
+.node.inbox.hit .box{box-shadow:0 0 0 6px #0f7b5226;transform:scale(1.06)}
+@keyframes thud{30%{transform:scale(.92)}60%{transform:scale(1.04)}}
+.track{position:relative;height:72px}
+.track::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1.5px dashed var(--line)}
+.track.out::before{border-color:#0f7b5255}
+.pdot{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--ink-2);box-shadow:0 0 0 3px var(--paper)}
+.pdot.APPROVE{background:var(--ok)}.pdot.HOLD_FOR_REVIEW{background:var(--hold)}.pdot.BLOCK{background:var(--bad)}
+.stopped{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;max-width:120px;margin:8px auto 0;min-height:10px}
+.stopped i{width:8px;height:8px;border-radius:2px;animation:drop .3s var(--ease)}
+.stopped i.HOLD_FOR_REVIEW{background:var(--hold)}.stopped i.BLOCK{background:var(--bad)}
+
 /* ---------- audit ---------- */
 .atable{max-width:1240px;margin:22px auto 40px;padding:0 32px}
 .filters{display:flex;gap:6px;margin-bottom:12px}
@@ -317,6 +338,13 @@ details[open] summary{margin-bottom:8px}
       <h1>Gate simulation</h1>
       <p>Every test memo goes through the live gate (<code>POST /decide</code>). Only approved memos trigger <code>submit_memo_to_partner</code>; held and blocked memos never reach the action.</p>
       <div class="row" style="margin-top:16px"><button class="btn primary" id="runall" style="margin-left:0">Run all test memos</button><span class="note" id="bstat" style="margin:0"></span></div>
+    </div>
+    <div class="flow" aria-label="Gate flow">
+      <div class="node"><div class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3h8l4 4v14H6z"/><path d="M9 12h6M9 16h4"/></svg></div><b id="f-q">16</b><small>Drafts queued</small></div>
+      <div class="track" id="t-in"></div>
+      <div class="node gate" id="f-gate"><div class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 7v5c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V7z"/><path d="m9 12 2 2 4-4"/></svg></div><b id="f-stop">0</b><small>Stopped at gate</small><div class="stopped" id="f-pile"></div></div>
+      <div class="track out" id="t-out"></div>
+      <div class="node inbox" id="f-inbox"><div class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 13h5l2 3h4l2-3h5"/><path d="M5 5h14l2 8v6H3v-6z"/></svg></div><b id="f-in">0</b><small>Partner's inbox</small></div>
     </div>
     <div class="kpis">
       <div class="kpi"><small>Delivered to partner</small><b id="k-sent">–</b><span>action executed</span></div>
@@ -590,11 +618,25 @@ async function runAll() {
     const sorted = [...lat].sort((a, b) => a - b); $("k-lat").textContent = sorted.length ? (sorted[sorted.length >> 1] / 1000).toFixed(1) + "s" : "–"; };
   kp();
   const queue = [...SAMPLES];
+  let fq = SAMPLES.length, fstop = 0, fin = 0;
+  $("f-q").textContent = fq; $("f-stop").textContent = 0; $("f-in").textContent = 0; $("f-pile").innerHTML = "";
+  const travel = (decision) => {
+    const run = (track, cls, ms) => new Promise((res) => {
+      const d = document.createElement("i"); d.className = "pdot " + cls; $(track).appendChild(d);
+      d.animate([{left:"0%"},{left:"100%"}], {duration:ms, easing:"cubic-bezier(.5,0,.3,1)"}).onfinish = () => { d.remove(); res(); };
+    });
+    $("f-q").textContent = --fq;
+    run("t-in", "", 520).then(() => {
+      const g = $("f-gate"); g.classList.remove("hit"); void g.offsetWidth; g.classList.add("hit");
+      if (decision === "APPROVE") run("t-out", "APPROVE", 520).then(() => { $("f-in").textContent = ++fin; const b = $("f-inbox"); b.classList.add("hit"); setTimeout(() => b.classList.remove("hit"), 250); });
+      else { $("f-stop").textContent = ++fstop; $("f-pile").insertAdjacentHTML("beforeend", `<i class="${decision}" title="${decision}"></i>`); }
+    });
+  };
   const worker = async () => { while (queue.length) {
     const s = queue.shift();
     try {
       const r = await decide(s.text, s.context);
-      n[r.decision]++; lat.push(r._ms);
+      n[r.decision]++; lat.push(r._ms); travel(r.decision);
       $("n-" + r.decision).textContent = n[r.decision];
       $("l-" + r.decision).insertAdjacentHTML("afterbegin", `<div class="bcard"><div class="t">${annotate(s.text, r.citations || [])}</div><div class="r">${esc(r.reason.replace(/^(BLOCKED|HOLD FOR REVIEW): /, ""))}</div>
         <div class="f"><span>${esc(s.id)} · ${(r._ms / 1000).toFixed(1)}s</span>${r.action_executed ? `<span class="y">submit_memo_to_partner ✓</span>` : `<span class="x">action withheld</span>`}</div></div>`);
